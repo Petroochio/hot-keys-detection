@@ -3,12 +3,10 @@ A simple Open CV python server that opens a port on 5000 where it sends the data
 
 ## Setup
 
-- Install Python 2.7 (we should probs upgrade)
-- Install pip
-- Run `pip install numpy`
-- Run `pip install pyinstaller`
-- Run `pip install eventlet python-socketio`
-- Install Open-CV [how to](https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_setup/py_setup_in_windows/py_setup_in_windows.html#installing-opencv-from-prebuilt-binaries)
+- Install Python 3.7+ and make sure pip works
+- To install server libs Run `pip install aiohttp asyncio aiohttp python-socketio`
+- To install open cv libs Run `pip install numpy opencv-python opencv-contrib-python`
+- If you want to build the app Run `pip install pyinstaller`
 
 ### Special Windows Stuff
 - You might have to install pip manually [here are some tips](https://stackoverflow.com/a/12476379)
@@ -16,4 +14,4 @@ A simple Open CV python server that opens a port on 5000 where it sends the data
 
 ## Building
 
-- Run `pyinstaller --onefile main.py`
+- Run `pyinstaller --onefile --hidden-import engineio.async_drivers.aiohttp --hidden-import engineio.async_aiohttp main.py`

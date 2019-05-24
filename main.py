@@ -3,9 +3,8 @@ import cv2
 from cv2 import aruco
 
 # socket libs
+from aiohttp import web
 import socketio
-import engineio
-import eventlet
 
 # CV STUFF
 
@@ -36,25 +35,28 @@ def get_keys():
   return []
 
 # create a Socket.IO server
-sio = socketio.Server()
+sio = socketio.AsyncServer(port='5000')
+app = web.Application()
+sio.attach(app)
 
-# wrap with a WSGI application
-app = socketio.WSGIApp(sio, static_files={
-  '/': {'content_type': 'text/html', 'filename': 'index.html'}
-})
+async def index(request):
+  """Serve the client-side application."""
+  with open('index.html') as f:
+    return web.Response(text=f.read(), content_type='text/html')
 
 @sio.on('connect')
 def connect(sid, environ):
-  print('connect ', sid)
+  print("connect ", sid)
+
+@sio.on('get keys')
+async def send_keys(sid):
+  await sio.emit('send keys', { 'data': list(map(lambda k: k[0], get_keys())) })
 
 @sio.on('disconnect')
 def disconnect(sid):
   print('disconnect ', sid)
 
-@sio.on('get keys')
-def send_keys(sid):
-  # print(map(lambda k: k[0], get_keys()))
-  sio.emit('send keys', { 'data': map(lambda k: k[0], get_keys()) })
+app.router.add_get('/', index)
 
 if __name__ == '__main__':
-  eventlet.wsgi.server(eventlet.listen(('', 5000)), app)
+  web.run_app(app, port='5000')
