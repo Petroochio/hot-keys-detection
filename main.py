@@ -26,10 +26,14 @@ def get_keys():
   corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, dictionary)
   frame = aruco.drawDetectedMarkers(frame, corners, ids, borderColor=(0, 0, 255))
   
-  k = cv2.waitKey(16) # 60 fps?
+  # k = cv2.waitKey(16) # 60 fps?
+
+  # Uncomment this to show camera view
+  # cv2.imshow('Frame', frame)
+  print('send keys')
 
   if ids is not None:
-    print(ids)
+    # print(ids)
     return ids
   
   return []
@@ -50,7 +54,9 @@ def connect(sid, environ):
 
 @sio.on('get keys')
 async def send_keys(sid):
-  await sio.emit('send keys', { 'data': list(map(lambda k: k[0], get_keys())) })
+  # Need to flatten array and convert from int32
+  foundKeys = list(map(lambda k: int(k[0]), get_keys()))
+  await sio.emit('send keys', { 'data': foundKeys })
 
 @sio.on('disconnect')
 def disconnect(sid):
