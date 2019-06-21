@@ -29,7 +29,7 @@ def get_keys():
   # k = cv2.waitKey(16) # 60 fps?
 
   # Uncomment this to show camera view
-  # cv2.imshow('Frame', frame)
+  cv2.imshow('Frame', frame)
   print('send keys')
 
   if ids is not None:
