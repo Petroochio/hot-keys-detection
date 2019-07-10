@@ -1,4 +1,4 @@
-# Hot Keys Marker Detection
+# Mecha Markers Detection
 A simple Open CV python server that opens a port on 5000 where it sends the data of currently visible Aruco markers
 
 ## Setup
