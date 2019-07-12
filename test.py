@@ -3,11 +3,6 @@ import numpy as np
 import math
 from cv2 import aruco
 
-cap = cv2.VideoCapture(1)
-cap.set(cv2.CAP_PROP_FPS, 50)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-
 dictionary_name = aruco.DICT_4X4_50
 dictionary = aruco.getPredefinedDictionary(dictionary_name)
 
@@ -32,12 +27,19 @@ parameters.perspectiveRemoveIgnoredMarginPerCell = 0.4 # 0.13
 parameters.maxErroneousBitsInBorderRate = 0.8 # 0.35
 parameters.errorCorrectionRate = 1.2 # 0.6
 
-w = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-h = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-print(w, h)
+cap = None
+def initCamera():
+  global cap
+  cap = cv2.VideoCapture(1)
+  cap.set(cv2.CAP_PROP_FPS, 50)
+  cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+  cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+  w = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+  h = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+  print(w, h)
 # print(aruco.DetectorParameters())
 
-
+initCamera()
 while True:
   try:
     ret, frame = cap.read()
@@ -59,6 +61,10 @@ while True:
     if k == 27:
       break
   except Exception:
+    try:
+      initCamera()
+    except Exception:
+      pass
     pass
 
 cap.release()
