@@ -61,6 +61,7 @@ while True:
     if k == 27:
       break
   except Exception:
+    cap.release()
     try:
       initCamera()
     except Exception:
