@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import math
 from cv2 import aruco
 
 cap = cv2.VideoCapture(1)
@@ -31,7 +32,6 @@ parameters.perspectiveRemoveIgnoredMarginPerCell = 0.4 # 0.13
 parameters.maxErroneousBitsInBorderRate = 0.8 # 0.35
 parameters.errorCorrectionRate = 1.2 # 0.6
 
-
 w = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
 h = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 print(w, h)
@@ -39,34 +39,27 @@ print(w, h)
 
 
 while True:
-  ret, frame = cap.read()
+  try:
+    ret, frame = cap.read()
 
-  # frame = cv2.addWeighted(frame, 1.3, np.zeros(frame.shape, frame.dtype), 0, 0)
-
-  # lab = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
-  # l, a, b = cv2.split(lab)
-  # clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(20,20))
-  # cl = clahe.apply(l)
-  # limg = cv2.merge((cl,a,b))
-  # frame = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
-
-  # hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-  # hue, s, v = cv2.split(hsv)
-  # clahe = cv2.createCLAHE(clipLimit=5.0, tileGridSize=(8,8))
-  # v = clahe.apply(v)
-  # frame = cv2.merge((hue,s,v))
-  # frame = cv2.cvtColor(frame, cv2.COLOR_HSV2BGR)
+    frame = cv2.addWeighted(frame, 1.3, np.zeros(frame.shape, frame.dtype), 0, 0)
   
-  corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, dictionary, parameters=parameters)
-  frame = aruco.drawDetectedMarkers(frame, corners, ids, borderColor=(0, 0, 255))
-  frame = aruco.drawDetectedMarkers(frame, rejectedImgPoints, borderColor=(0, 255, 0))
-  if ids is not None:
-    print(ids)
-  cv2.imshow('Frame', frame)
+    corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, dictionary, parameters=parameters)
+    frame = aruco.drawDetectedMarkers(frame, corners, ids, borderColor=(0, 0, 255))
+    frame = aruco.drawDetectedMarkers(frame, rejectedImgPoints, borderColor=(0, 255, 0))
+    # result = {
+    #   'ids': ids.tolist(),
+    #   'corners': np.array(corners).tolist(),
+    # }
+    # print(result)
 
-  k = cv2.waitKey(30)
-  if k == 27:
-    break
+    cv2.imshow('Frame', frame)
+
+    k = cv2.waitKey(30)
+    if k == 27:
+      break
+  except Exception:
+    pass
 
 cap.release()
 cv2.destroyAllWindows()
