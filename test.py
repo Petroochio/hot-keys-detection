@@ -30,7 +30,7 @@ parameters.errorCorrectionRate = 1.2 # 0.6
 cap = None
 def initCamera():
   global cap
-  cap = cv2.VideoCapture(1)
+  cap = cv2.VideoCapture(0)
   cap.set(cv2.CAP_PROP_FPS, 50)
   cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
   cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
@@ -49,6 +49,11 @@ while True:
     corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, dictionary, parameters=parameters)
     frame = aruco.drawDetectedMarkers(frame, corners, ids, borderColor=(0, 0, 255))
     frame = aruco.drawDetectedMarkers(frame, rejectedImgPoints, borderColor=(0, 255, 0))
+    
+    # markers = []
+    # markerCorners = np.array(corners).tolist()
+    # for i,markerId in ids.tolist():
+    #   markers.append((markerId, markerCorners[i]))
     # result = {
     #   'ids': ids.tolist(),
     #   'corners': np.array(corners).tolist(),
