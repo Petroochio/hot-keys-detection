@@ -41,9 +41,11 @@ cameraParameters.errorCorrectionRate = 1.2 # 0.6
 
 # init camera
 cap = None
+camID = 0
 def init_camera():
   global cap
-  cap = cv2.VideoCapture(0)
+  global camID
+  cap = cv2.VideoCapture(camID)
   cap.set(cv2.CAP_PROP_FPS, 50)
   cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
   cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
@@ -85,6 +87,7 @@ app = web.Application()
 sio.attach(app)
 
 isDetecting = False
+isChangingCamera = False
 detectionThread = None
 async def detection_loop():
   global cap
@@ -94,7 +97,8 @@ async def detection_loop():
     keyInfo = { 'markers': [] }
 
     try:
-      keyInfo = get_keys()
+      if (not isChangingCamera):
+        keyInfo = get_keys()
     except Exception:
       print('capture error')
       cap.release()
@@ -120,6 +124,13 @@ def connect(sid, environ):
 @sio.on('set attribute')
 def set_attribute(sid, data):
   setattr(cameraParameters, data['attr'], data['value'])
+
+@sio.on('set camera')
+def set_attribute(sid, data):
+  camID = data['camID']
+  isChangingCamera = True
+  initCamera()
+  isChangingCamera = False
 
 @sio.on('stop detection')
 async def stop_detection(sid):
