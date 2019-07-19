@@ -21,23 +21,22 @@ dictionary = aruco.getPredefinedDictionary(dictionary_name)
 cameraParameters = aruco.DetectorParameters_create()
 # Thresholding
 cameraParameters.adaptiveThreshWinSizeMin = 3 # >= 3
-cameraParameters.adaptiveThreshWinSizeStep = 2 # 10
-cameraParameters.adaptiveThreshWinSizeMax = 10 # 23
+cameraParameters.adaptiveThreshWinSizeStep = 3 # 10
 cameraParameters.adaptiveThreshConstant = 7 # 7
 # Contour Filtering
-cameraParameters.minMarkerPerimeterRate = 0.05 # 0.03
-cameraParameters.maxMarkerPerimeterRate = 0.5 # 4.0
-cameraParameters.minCornerDistanceRate = 0.05 # 0.05
-cameraParameters.minMarkerDistanceRate = 0.05 # 0.05
-cameraParameters.minDistanceToBorder = 3 # 3
+cameraParameters.minMarkerPerimeterRate = 0.03 # 0.03
+cameraParameters.maxMarkerPerimeterRate = 0.2 # 4.0
+cameraParameters.minCornerDistanceRate = 0.2 # 0.05
+cameraParameters.minMarkerDistanceRate = 0.3 # 0.05
+cameraParameters.minDistanceToBorder = 5 # 3
 # Bits Extraction
 cameraParameters.markerBorderBits = 1 # 1
 cameraParameters.minOtsuStdDev = 5.0 # 5.0
 cameraParameters.perspectiveRemoveIgnoredMarginPerCell = 0.4 # 0.13
 # parameters.perpectiveRemovePixelPerCell = 10 # 4
 # Marker Identification
-cameraParameters.maxErroneousBitsInBorderRate = 0.8 # 0.35
-cameraParameters.errorCorrectionRate = 1.2 # 0.6
+cameraParameters.maxErroneousBitsInBorderRate = 0.63 # 0.35
+cameraParameters.errorCorrectionRate = 2.8 # 0.6
 
 # init camera
 cap = None
@@ -60,7 +59,7 @@ def get_keys():
   frame = aruco.drawDetectedMarkers(frame, rejectedImgPoints, borderColor=(0, 255, 0))
 
   # Encode Image for sending
-  ret, buffer = cv2.imencode('.jpg', frame)
+  ret, buffer = cv2.imencode('.jpg', cv2.resize(frame, (640,360)))
   image = base64.b64encode(buffer).decode('utf-8')
 
   # If no Ids are found create an empty array
@@ -72,7 +71,7 @@ def get_keys():
 
   # Join Corners and Ids into one array
   for i,markerId in enumerate(ids.tolist()):
-    markers.append((markerId, markerCorners[i]))
+    markers.append((markerId[0], markerCorners[i][0]))
   
   result = {
     'markers': markers,
@@ -89,18 +88,26 @@ sio.attach(app)
 isDetecting = False
 isChangingCamera = False
 detectionThread = None
+camImage = None
 async def detection_loop():
   global cap
   global sio
+  global isChangingCamera
+  global camImage
 
   while (True):
     keyInfo = { 'markers': [] }
 
     try:
       if (not isChangingCamera):
-        keyInfo = get_keys()
+        captureInfo = get_keys()
+        keyInfo['markers'] = captureInfo['markers']
+        camImage = captureInfo['image']
+      else:
+        isChangingCamera = False
+        cap.release()
+        init_camera()
     except Exception:
-      print('capture error')
       cap.release()
       try:
         init_camera()
@@ -109,12 +116,23 @@ async def detection_loop():
       pass
 
     await sio.emit('update markers', keyInfo)
-    await asyncio.sleep(1/50)
-    
+    # await sio.emit('update image', image)
+    await asyncio.sleep(1/70)
+
+imageThread = None
+async def image_loop():
+  global camImage
+  global sio
+
+  while(True):
+    if (camImage is not None):
+      await sio.emit('update image', { 'image': camImage })
+    await asyncio.sleep(1/30)
+
 
 async def index(request):
   """Serve the client-side application."""
-  with open('index.html') as f:
+  with open('preview/index.html') as f:
     return web.Response(text=f.read(), content_type='text/html')
 
 @sio.on('connect')
@@ -123,17 +141,22 @@ def connect(sid, environ):
 
 @sio.on('set attribute')
 def set_attribute(sid, data):
-  setattr(cameraParameters, data['attr'], data['value'])
+  global cameraParameters
+  param = getattr(cameraParameters, data['attr']) 
+  if (isinstance(param, int)):
+    setattr(cameraParameters, data['attr'], int(data['value']))
+  elif (isinstance(param, float)):
+    setattr(cameraParameters, data['attr'], float(data['value']))
 
 @sio.on('set camera')
-def set_attribute(sid, data):
-  camID = data['camID']
+def set_camera(sid, data):
+  global camID
+  global isChangingCamera
+  camID = int(data['camID'])
   isChangingCamera = True
-  initCamera()
-  isChangingCamera = False
 
 @sio.on('stop detection')
-async def stop_detection(sid):
+def stop_detection(sid):
   global isDetecting
   global detectionThread
 
@@ -150,6 +173,7 @@ app.router.add_get('/', index)
 
 if __name__ == '__main__':
   init_camera()
-  sio.start_background_task(target=detection_loop)
+  detectionThread = sio.start_background_task(target=detection_loop)
+  imageThread = sio.start_background_task(target=image_loop)
 
   web.run_app(app, port='5000')
