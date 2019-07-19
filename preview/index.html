@@ -29,21 +29,21 @@
           font-family: monospace;
           z-index: 5;
       }
-​
+
       .parameterItem {
           position: relative;
           float: left;
           clear: both;
           margin-bottom: 0.5em;
       }
-​
+
       .parameterItem span {
           position: relative;
           float: left;
           width: 16em;
           line-height: 1.7em;
       }
-​
+
       .parameterItem input {
           position: relative;
           float: left;
@@ -136,6 +136,10 @@
         });
 
         socket.on('update markers', (data) => {
+          // console.log('got markers');
+        });
+      
+        socket.on('update image', (data) => {
           app.markerImage.src = 'data:image/png;base64,' + data.image;
         });
 

@@ -59,7 +59,7 @@ def get_keys():
   frame = aruco.drawDetectedMarkers(frame, rejectedImgPoints, borderColor=(0, 255, 0))
 
   # Encode Image for sending
-  ret, buffer = cv2.imencode('.jpg', frame)
+  ret, buffer = cv2.imencode('.jpg', cv2.resize(frame, (640,360)))
   image = base64.b64encode(buffer).decode('utf-8')
 
   # If no Ids are found create an empty array
@@ -88,17 +88,21 @@ sio.attach(app)
 isDetecting = False
 isChangingCamera = False
 detectionThread = None
+camImage = None
 async def detection_loop():
   global cap
   global sio
   global isChangingCamera
+  global camImage
 
   while (True):
     keyInfo = { 'markers': [] }
 
     try:
       if (not isChangingCamera):
-        keyInfo = get_keys()
+        captureInfo = get_keys()
+        keyInfo['markers'] = captureInfo['markers']
+        camImage = captureInfo['image']
       else:
         isChangingCamera = False
         cap.release()
@@ -113,8 +117,18 @@ async def detection_loop():
 
     await sio.emit('update markers', keyInfo)
     # await sio.emit('update image', image)
-    await asyncio.sleep(1/60)
-    
+    await asyncio.sleep(1/70)
+
+imageThread = None
+async def image_loop():
+  global camImage
+  global sio
+
+  while(True):
+    if (camImage is not None):
+      await sio.emit('update image', { 'image': camImage })
+    await asyncio.sleep(1/30)
+
 
 async def index(request):
   """Serve the client-side application."""
@@ -160,5 +174,6 @@ app.router.add_get('/', index)
 if __name__ == '__main__':
   init_camera()
   detectionThread = sio.start_background_task(target=detection_loop)
+  imageThread = sio.start_background_task(target=image_loop)
 
   web.run_app(app, port='5000')
