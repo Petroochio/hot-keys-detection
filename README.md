@@ -14,4 +14,4 @@ A simple Open CV python server that opens a port on 5000 where it sends the data
 
 ## Building
 
-- Run `pyinstaller --onefile --hidden-import engineio.async_drivers.aiohttp --hidden-import engineio.async_aiohttp main.py`
+- Run `pyinstaller main.spec`
