@@ -27,10 +27,16 @@ parameters.perspectiveRemoveIgnoredMarginPerCell = 0.4 # 0.13
 parameters.maxErroneousBitsInBorderRate = 0.8 # 0.35
 parameters.errorCorrectionRate = 1.2 # 0.6
 
+# Define camera matrix K
+K = np.array([[2092.76344, 0, 932.885375],[0, 2079.89452, 524.715539],[0, 0, 1]])
+
+# Define distortion coefficients d
+d = np.array([-6.80248928e-01, -2.05147602e+00, -1.80710163e-02, -2.27621078e-03, 1.38079898e+01])
+
 cap = None
 def initCamera():
   global cap
-  cap = cv2.VideoCapture(1)
+  cap = cv2.VideoCapture(0)
   cap.set(cv2.CAP_PROP_FPS, 50)
   cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
   cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
@@ -45,6 +51,16 @@ while True:
     ret, frame = cap.read()
 
     frame = cv2.addWeighted(frame, 1.3, np.zeros(frame.shape, frame.dtype), 0, 0)
+    h, w = frame.shape[:2]
+
+    # Generate new camera matrix from parameters
+    newcameramatrix, roi = cv2.getOptimalNewCameraMatrix(K, d, (w,h), 0)
+
+    # Generate look-up tables for remapping the camera image
+    mapx, mapy = cv2.initUndistortRectifyMap(K, d, None, newcameramatrix, (w, h), 5)
+
+    # Remap the original image to a new image
+    frame = cv2.remap(frame, mapx, mapy, cv2.INTER_LINEAR)
   
     corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, dictionary, parameters=parameters)
     frame = aruco.drawDetectedMarkers(frame, corners, ids, borderColor=(0, 0, 255))
