@@ -59,7 +59,7 @@ def get_keys():
   frame = aruco.drawDetectedMarkers(frame, rejectedImgPoints, borderColor=(0, 255, 0))
 
   # Encode Image for sending
-  ret, buffer = cv2.imencode('.jpg', cv2.resize(frame, (640,360)))
+  ret, buffer = cv2.imencode('.jpg', cv2.resize(frame, (640, 360)))
   image = base64.b64encode(buffer).decode('utf-8')
 
   # If no Ids are found create an empty array
@@ -71,7 +71,7 @@ def get_keys():
 
   # Join Corners and Ids into one array
   for i,markerId in enumerate(ids.tolist()):
-    markers.append((markerId[0], markerCorners[i][0]))
+    markers.append({ 'id': markerId[0], 'corners': markerCorners[i][0] })
   
   result = {
     'markers': markers,
@@ -143,9 +143,12 @@ def connect(sid, environ):
 def set_attribute(sid, data):
   global cameraParameters
   param = getattr(cameraParameters, data['attr']) 
+
   if (isinstance(param, int)):
     setattr(cameraParameters, data['attr'], int(data['value']))
+    print("Set param '" + data['attr'] + "' to: " + str(int(data['value'])))
   elif (isinstance(param, float)):
+    print("Set param '" + data['attr'] + "' to: " + str(float(data['value'])))
     setattr(cameraParameters, data['attr'], float(data['value']))
 
 @sio.on('set camera')
@@ -170,6 +173,7 @@ def disconnect(sid):
   print('disconnect ', sid)
 
 app.router.add_get('/', index)
+app.router.add_static('/static/', path=str('./preview'), name='static')
 
 if __name__ == '__main__':
   init_camera()
