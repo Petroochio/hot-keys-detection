@@ -32,6 +32,10 @@ function vecUnit(vec) {
   };
 }
 
+function vecRot90(vec) {
+  return {x:vec.y, y:-vec.x}
+}
+
 // Line closest point
 function lineCP(sP, eP, pt) {
   var sToPt = vecSub(sP, pt);
@@ -88,7 +92,7 @@ function mapPointToUV(pt) {
     };
   }
 
-  console.warn('Cannot find quad for given point in: mapPointToUV')
+  console.warn('Cannot find quad for given point in: mapPointToUV') // PETER CODE LAGS AROUND HERE
   // Probs should throw error
   return undefined;
 }
