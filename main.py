@@ -53,6 +53,10 @@ def get_keys():
   global cap
   ret, frame = cap.read()
 
+  # RESIZE FUNCTION TO REDUCE LATENCY - MAYBE????
+  # 1280x720 1120x630 960x540
+  frame = cv2.resize(frame, (1120, 630))
+
   # process key here
   corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, dictionary, parameters=cameraParameters)
   frame = aruco.drawDetectedMarkers(frame, corners, ids, borderColor=(0, 0, 255))

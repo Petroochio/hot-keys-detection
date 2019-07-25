@@ -84,7 +84,6 @@ function mapQuad(pt, quadArr) {
 function mapPointToUV(pt) {
   const quadindex = QUADS.findIndex(q => ptInQuad(pt, q));
   const quad = QUADS[quadindex];
-
   if (quad) {
     return {
       uv: mapQuad(pt, quad),
@@ -92,7 +91,7 @@ function mapPointToUV(pt) {
     };
   }
 
-  console.warn('Cannot find quad for given point in: mapPointToUV') // PETER CODE LAGS AROUND HERE
+  // console.warn('Cannot find quad for given point in: mapPointToUV') // PETER CODE LAGS AROUND HERE
   // Probs should throw error
   return undefined;
 }

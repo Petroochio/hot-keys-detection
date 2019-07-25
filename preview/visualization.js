@@ -6,10 +6,10 @@ var markerData = [];
 var markerUpdated = true;
 
 const SCREEN = {
-  rx: 108, // mm (real world dimensions)
-  ry: 80, // mm (real world dimensions)
-  rw: 930, // mm (real world dimensions)
-  rh: 569, // mm (real world dimensions)
+  rx: 114, // mm (real world dimensions)
+  ry: 88, // mm (real world dimensions)
+  rw: 895, // mm (real world dimensions)
+  rh: 560, // mm (real world dimensions)
   w: window.innerWidth, // px (screen resolution)
   h: window.innerHeight, // px (screen resolution)
 };
@@ -17,6 +17,9 @@ const SCREEN = {
 const FPS = 50;
 
 function init() {
+  initQuads();
+  // console.log(QUADS);
+
   c = document.getElementById('vis');
   c.width = window.innerWidth;
   c.height = window.innerHeight;
@@ -120,6 +123,9 @@ function mapToScreen(pt) {
     py = (py / SCREEN.rh) * SCREEN.h;
     return {x:px, y:py};
   }
+
+  // Don't return undefined
+  return { x: 0, y: 0};
 }
 
 function drawMarkerRect(cen, cor, size, id) {
@@ -149,53 +155,4 @@ function drawMarkerRect(cen, cor, size, id) {
   ctx.fillText(id, textPos.x, textPos.y);
 }
 
-window.onload = init;
-
-
-
-
-
-
-
-
-
-
-
-
-// Lol we made a vector library
-function vecAdd(vec1, vec2) {
-  return {x:vec1.x + vec2.x, y:vec1.y + vec2.y};
-}
-
-// vector vec1 ---> vec2
-function vecSub(vec1, vec2) {
-  return {x:-vec1.x + vec2.x, y:-vec1.y + vec2.y};
-}
-
-function vecScale(vec, scale) {
-  return {x:vec.x*scale, y:vec.y*scale};
-}
-
-function vecDot(vec1, vec2) {
-  return vec1.x*vec2.x + vec1.y*vec2.y;
-}
-
-function vecMag(vec) {
-  return Math.pow(Math.pow(vec.x, 2) + Math.pow(vec.y, 2), 0.5);
-}
-
-function vecMag2(vec) {
-  return Math.pow(vec.x, 2) + Math.pow(vec.y, 2);
-}
-
-function vecUnit(vec) {
-  var m = vecMag(vec);
-  return {
-    x: vec.x/m,
-    y: vec.y/m,
-  };
-}
-
-function vecRot90(vec) {
-  return {x:vec.y, y:-vec.x}
-}
+window.onload = () => init();

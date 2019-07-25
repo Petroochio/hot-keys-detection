@@ -1,4 +1,9 @@
-const QUADS = [
+//normalized based on image height
+const IMGW = 1120;
+const IMGH = 630;
+// const IMGW = 1280;
+// const IMGH = 720;
+const QUADSNORM = [
   [{x:71, y:94},{x:135, y:76},{x:141, y:196},{x:76, y:206}],
   [{x:135, y:76},{x:213, y:60},{x:217, y:187},{x:141, y:196}],
   [{x:213, y:60},{x:304, y:43},{x:307, y:177},{x:217, y:187}],
@@ -66,6 +71,28 @@ const QUADS = [
   [{x:914, y:626},{x:992, y:619},{x:968, y:692},{x:893, y:701}],
   [{x:992, y:619},{x:1063, y:608},{x:1035, y:681},{x:968, y:692}],
 ];
+
+const QUADS = QUADSNORM.map(
+  subset => subset.map(
+    q => ({
+      x: q.x / 1280 * IMGW,
+      y: q.y / 720 * IMGH,
+    })
+  )
+);
+function initQuads() {
+  for(var i=0; i<QUADSNORM.length; i++) {
+    var quadArr = [];
+    for (var j=0; j<QUADSNORM[i].length; j++) {
+      var coord = {
+        x: QUADSNORM[i][j].x / 1280 * IMGW,
+        y: QUADSNORM[i][j].y / 720 * IMGH,
+      };
+      quadArr.push(coord);
+    }
+    QUADS.push(quadArr);
+  }
+}
 
 const CELLS = [
   [{x:31, y:698},{x:121, y:698},{x:121, y:588},{x:31, y:588}],

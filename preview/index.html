@@ -93,7 +93,7 @@
         </div>
         <div class="parameterItem" title="Minimum distance between any pair of corners from two different markers. It is expressed relative to the minimum marker perimeter of the two markers. If two candidates are too close, the smaller one is ignored.">
             <span>minMarkerDistanceRate</span>
-            <input name="minMarkerDistanceRate" type="number" min="0.01" step="0.01" max="1.0" value="0.05">
+            <input name="minMarkerDistanceRate" type="number" min="0.01" step="0.01" max="1.0" value="0.02">
         </div>
         <div class="parameterItem" title="Minimum distance to any of the marker corners to the image border (in pixels). Markers partially occluded by the image border can be correctly detected if the occlusion is small. However, if one of the corner is occluded, the returned corner is usually placed in a wrong position near the image border.">
             <span>minDistanceToBorder</span>
@@ -109,7 +109,7 @@
         </div>
         <div class="parameterItem" title="This parameter determines the number of pixels (per cell) in the obtained image after removing perspective distortion (including the border). This is the size of the red squares in the image above. For instance, lets assume we are dealing with markers of 5x5 bits and border size of 1 bit (see markerBorderBits). Then, the total number of cells/bits per dimension is 5 + 2*1 = 7 (the border has to be counted twice). The total number of cells is 7x7. If the value of perpectiveRemovePixelPerCell is 10, then the size of the obtained image will be 10*7 = 70 -> 70x70 pixels. A higher value of this parameter can improve the bits extraction process (up to some degree), however it can penalize the performance.">
             <span>perpectiveRemovePixelPerCell</span>
-            <input name="perspectiveRemovePixelPerCell" type="number" min="1" step="1" value="4">
+            <input name="perspectiveRemovePixelPerCell" type="number" min="1" step="1" value="6">
         </div>
         <div class="parameterItem" title="When extracting the bits of each cell, the numbers of black and white pixels are counted. In general, it is not recommended to consider all the cell pixels. Instead it is better to ignore some pixels in the margins of the cells. The reason of this is that, after removing the perspective distortion, the cells' colors are, in general, not perfectly separated and white cells can invade some pixels of black cells (and vice-versa). Thus, it is better to ignore some pixels just to avoid counting erroneous pixels. This parameter is relative to the total size of the cell. For instance if the cell size is 40 pixels and the value of this parameter is 0.1, a margin of 40*0.1=4 pixels is ignored in the cells. This means that the total amount of pixels that would be analyzed on each cell would actually be 32x32, instead of 40x40.">
             <span>perspectiveRemoveIgnoredMarginPerCell</span>
@@ -121,7 +121,7 @@
         </div>
         <div class="parameterItem" title="Each marker dictionary has a theoretical maximum number of bits that can be corrected (Dictionary.maxCorrectionBits). However, this value can be modified by the errorCorrectionRate parameter. For instance, if the allowed number of bits that can be corrected (for the used dictionary) is 6 and the value of errorCorrectionRate is 0.5, the real maximum number of bits that can be corrected is 6*0.5=3 bits. This value is useful to reduce the error correction capabilities in order to avoid false positives.">
             <span>errorCorrectionRate</span>
-            <input name="errorCorrectionRate" type="number" min="0" step="0.01" value="1.2">
+            <input name="errorCorrectionRate" type="number" min="0" step="0.01" value="1.5">
         </div>
     </div>
     <img id="marker-image"></img>
