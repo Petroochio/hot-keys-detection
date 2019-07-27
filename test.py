@@ -51,16 +51,16 @@ while True:
     ret, frame = cap.read()
 
     frame = cv2.addWeighted(frame, 1.3, np.zeros(frame.shape, frame.dtype), 0, 0)
-    h, w = frame.shape[:2]
+    # h, w = frame.shape[:2]
 
-    # Generate new camera matrix from parameters
-    newcameramatrix, roi = cv2.getOptimalNewCameraMatrix(K, d, (w,h), 0)
+    # # Generate new camera matrix from parameters
+    # newcameramatrix, roi = cv2.getOptimalNewCameraMatrix(K, d, (w,h), 0)
 
-    # Generate look-up tables for remapping the camera image
-    mapx, mapy = cv2.initUndistortRectifyMap(K, d, None, newcameramatrix, (w, h), 5)
+    # # Generate look-up tables for remapping the camera image
+    # mapx, mapy = cv2.initUndistortRectifyMap(K, d, None, newcameramatrix, (w, h), 5)
 
-    # Remap the original image to a new image
-    frame = cv2.remap(frame, mapx, mapy, cv2.INTER_LINEAR)
+    # # Remap the original image to a new image
+    # frame = cv2.remap(frame, mapx, mapy, cv2.INTER_LINEAR)
   
     corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, dictionary, parameters=parameters)
     frame = aruco.drawDetectedMarkers(frame, corners, ids, borderColor=(0, 0, 255))

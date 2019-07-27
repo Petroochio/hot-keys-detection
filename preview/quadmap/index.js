@@ -36,6 +36,23 @@ function vecRot90(vec) {
   return {x:vec.y, y:-vec.x}
 }
 
+function vecRot(vec, angle) {
+    var x = vec.x * Math.cos(angle) - vec.y * Math.sin(angle);
+    var y = vec.x * Math.sin(angle) + vec.y * Math.cos(angle);
+    return {x:x, y:y};
+}
+
+function vecAngleBetween(vec1, vec2) {
+  return Math.atan2(vec1.y - vec2.y, vec1.x - vec2.x);
+}
+
+function vecEMA(vec1, vec2, weight) {
+  return {
+    x: (vec1.x*(1-weight) + vec2.x*weight), 
+    y: (vec1.y*(1-weight) + vec2.y*weight) 
+  };
+}
+
 // Line closest point
 function lineCP(sP, eP, pt) {
   var sToPt = vecSub(sP, pt);

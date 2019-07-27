@@ -41,30 +41,36 @@ cameraParameters.errorCorrectionRate = 2.8 # 0.6
 # init camera
 cap = None
 camID = 0
+camData = None
 def init_camera():
   global cap
   global camID
   cap = cv2.VideoCapture(camID)
-  cap.set(cv2.CAP_PROP_FPS, 50)
+  cap.set(cv2.CAP_PROP_FPS, 60)
   cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
   cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
 def get_keys():
   global cap
+  global camImage
+  global camData
   ret, frame = cap.read()
+  frame = cv2.addWeighted(frame, 1.3, np.zeros(frame.shape, frame.dtype), 0, 0)
 
   # RESIZE FUNCTION TO REDUCE LATENCY - MAYBE????
   # 1280x720 1120x630 960x540
-  frame = cv2.resize(frame, (1120, 630))
+  frame = cv2.resize(frame, (1280, 720))
 
   # process key here
   corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, dictionary, parameters=cameraParameters)
-  frame = aruco.drawDetectedMarkers(frame, corners, ids, borderColor=(0, 0, 255))
-  frame = aruco.drawDetectedMarkers(frame, rejectedImgPoints, borderColor=(0, 255, 0))
+  camImage = frame
+  camData = (corners, ids, rejectedImgPoints)
+  # frame = aruco.drawDetectedMarkers(frame, corners, ids, borderColor=(0, 0, 255))
+  # frame = aruco.drawDetectedMarkers(frame, rejectedImgPoints, borderColor=(0, 255, 0))
 
-  # Encode Image for sending
-  ret, buffer = cv2.imencode('.jpg', cv2.resize(frame, (640, 360)))
-  image = base64.b64encode(buffer).decode('utf-8')
+  # # Encode Image for sending
+  # ret, buffer = cv2.imencode('.jpg', cv2.resize(frame, (640, 360)))
+  # image = base64.b64encode(buffer).decode('utf-8')
 
   # If no Ids are found create an empty array
   if ids is None:
@@ -79,7 +85,6 @@ def get_keys():
   
   result = {
     'markers': markers,
-    'image': image,
   }
 
   return result
@@ -106,7 +111,6 @@ async def detection_loop():
       if (not isChangingCamera):
         captureInfo = get_keys()
         keyInfo['markers'] = captureInfo['markers']
-        camImage = captureInfo['image']
       else:
         isChangingCamera = False
         cap.release()
@@ -120,7 +124,6 @@ async def detection_loop():
       pass
 
     await sio.emit('update markers', keyInfo)
-    # await sio.emit('update image', image)
     await asyncio.sleep(1/70)
 
 imageThread = None
@@ -130,7 +133,16 @@ async def image_loop():
 
   while(True):
     if (camImage is not None):
-      await sio.emit('update image', { 'image': camImage })
+      corners, ids, rejectedImgPoints = camData
+
+      frame = aruco.drawDetectedMarkers(camImage, corners, ids, borderColor=(0, 0, 255))
+      frame = aruco.drawDetectedMarkers(frame, rejectedImgPoints, borderColor=(0, 255, 0))
+
+      # Encode Image for sending
+      ret, buffer = cv2.imencode('.jpg', cv2.resize(frame, (640, 360)))
+      image = base64.b64encode(buffer).decode('utf-8')
+
+      await sio.emit('update image', { 'image': image })
     await asyncio.sleep(1/30)
 
 

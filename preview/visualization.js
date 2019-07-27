@@ -1,35 +1,23 @@
 const app = {};
 
-var c;
-var ctx;
-var markerData = [];
-var markerUpdated = true;
-
-const SCREEN = {
-  rx: 114, // mm (real world dimensions)
-  ry: 88, // mm (real world dimensions)
-  rw: 895, // mm (real world dimensions)
-  rh: 560, // mm (real world dimensions)
-  w: window.innerWidth, // px (screen resolution)
-  h: window.innerHeight, // px (screen resolution)
-};
+let c;
+let ctx;
+let markerData;
+let inputs;
+let markerUpdated = true;
 
 const FPS = 50;
 
 function init() {
-  initQuads();
-  // console.log(QUADS);
+
+  initMarkers();
+  inputs = INPUT_CONFIG.map(inputConf => createInput(markerData, inputConf));
 
   c = document.getElementById('vis');
   c.width = window.innerWidth;
   c.height = window.innerHeight;
   ctx = c.getContext('2d');
   ctx.translate(0.5, 0.5);
-  ctx.fillStyle = 'rgba(255, 255, 255, 1.0)';
-  ctx.strokeStyle = 'rgba(255, 255, 255, 1.0)';
-  ctx.font = "13px sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
 
   app.markerImage = document.querySelector('#marker-image');
 
@@ -57,7 +45,7 @@ function init() {
 
   socket.on('update markers', (data) => {
     const markers = data.markers;
-    markerUpdated = false;
+
     if (markers.length > 0) {
       const mappedMarkers = markers.map(m => {
         const mappedCorners = mapCornersToUV(m.corners);
@@ -74,8 +62,15 @@ function init() {
       // HERE IS WHERE THE ARRAY OF MARKERS IS CLEMENT
       // MappedMarkers
       // console.log(mappedMarkers);
-      markerData = mappedMarkers;
+      const timenow = Date.now();
+
+      mappedMarkers.forEach(m => {
+        if (m !== undefined) {
+          markerData[m.id].update(m, timenow);
+        }
+      });
     }
+
   });
 
   initAnimation(FPS);
@@ -102,57 +97,23 @@ function animate() {
 }
 
 function updateVis() {
-  if (!markerUpdated) {
-    ctx.clearRect(-10, -10, window.innerWidth+10, window.innerHeight+10);
-    if (markerData.length > 0) {
-      for (var i=0; i<markerData.length; i++) {
-        if (markerData[i] !== undefined) { // CHECK THIS BUG PETER
-          drawMarkerRect(markerData[i].center, markerData[i].corner, 90, markerData[i].id);
-        }
-      }
-    }
-    markerUpdated = true;
-  }
-}
 
-function mapToScreen(pt) {
-  if (pt.x >= SCREEN.rx && pt.x <= SCREEN.rx + SCREEN.rw && pt.y >= SCREEN.ry && pt.y <= SCREEN.ry + SCREEN.rh) {
-    var px = pt.x - SCREEN.rx;
-    var py = pt.y - SCREEN.ry;
-    px = (px / SCREEN.rw) * SCREEN.w;
-    py = (py / SCREEN.rh) * SCREEN.h;
-    return {x:px, y:py};
-  }
+  inputs.forEach(input => input.update());
 
-  // Don't return undefined
-  return { x: 0, y: 0};
-}
+  ctx.fillStyle = 'rgba(255, 255, 255, 1.0)';
+  ctx.strokeStyle = 'rgba(255, 255, 255, 1.0)';
+  ctx.font = "13px sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
 
-function drawMarkerRect(cen, cor, size, id) {
-  var posCen = mapToScreen(cen);
-  var posCor = mapToScreen(cor);
-  var vecCenCor0 = vecUnit(vecSub(posCen, posCor));
-  var vecCenCor1 = vecRot90(vecCenCor0);
-  var vecCenCor2 = vecRot90(vecCenCor1);
-  var vecCenCor3 = vecRot90(vecCenCor2);
-  var cor0 = vecAdd(posCen, vecScale(vecCenCor0, size/2));
-  var cor1 = vecAdd(posCen, vecScale(vecCenCor1, size/2));
-  var cor2 = vecAdd(posCen, vecScale(vecCenCor2, size/2));
-  var cor3 = vecAdd(posCen, vecScale(vecCenCor3, size/2));
-  
-  ctx.beginPath();
-  ctx.moveTo(Math.round(cor0.x), Math.round(cor0.y));
-  ctx.lineTo(Math.round(cor1.x), Math.round(cor1.y));
-  ctx.lineTo(Math.round(cor2.x), Math.round(cor2.y));
-  ctx.lineTo(Math.round(cor3.x), Math.round(cor3.y));
-  ctx.lineTo(Math.round(cor0.x), Math.round(cor0.y));
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.ellipse(cor0.x, cor0.y, 2.5, 2.5, 0, 0, Math.PI*2, false);
-  ctx.fill();
+  ctx.clearRect(-10, -10, window.innerWidth+10, window.innerHeight+10);
+  let timenow = Date.now();
 
-  var textPos = vecAdd(posCen, vecScale(vecCenCor0, size/2*1.5));
-  ctx.fillText(id, textPos.x, textPos.y);
+  markerData.forEach(m => m.checkPresence(timenow));
+  markerData.forEach(m => m.display(90));
+
+  inputs.forEach(input => input.display());
+
 }
 
 window.onload = () => init();

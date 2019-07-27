@@ -1,8 +1,17 @@
-//normalized based on image height
-const IMGW = 1120;
-const IMGH = 630;
-// const IMGW = 1280;
-// const IMGH = 720;
+// normalized based on image height
+
+// const IMGW = 960;
+// const IMGH = 540;
+
+// const IMGW = 1120;
+// const IMGH = 630;
+
+const IMGW = 1280;
+const IMGH = 720;
+
+// const IMGW = 1920;
+// const IMGH = 1080;
+
 const QUADSNORM = [
   [{x:71, y:94},{x:135, y:76},{x:141, y:196},{x:76, y:206}],
   [{x:135, y:76},{x:213, y:60},{x:217, y:187},{x:141, y:196}],
@@ -80,19 +89,6 @@ const QUADS = QUADSNORM.map(
     })
   )
 );
-function initQuads() {
-  for(var i=0; i<QUADSNORM.length; i++) {
-    var quadArr = [];
-    for (var j=0; j<QUADSNORM[i].length; j++) {
-      var coord = {
-        x: QUADSNORM[i][j].x / 1280 * IMGW,
-        y: QUADSNORM[i][j].y / 720 * IMGH,
-      };
-      quadArr.push(coord);
-    }
-    QUADS.push(quadArr);
-  }
-}
 
 const CELLS = [
   [{x:31, y:698},{x:121, y:698},{x:121, y:588},{x:31, y:588}],
