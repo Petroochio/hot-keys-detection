@@ -43,7 +43,7 @@ function vecRot(vec, angle) {
 }
 
 function vecAngleBetween(vec1, vec2) {
-  return Math.atan2(vec1.y - vec2.y, vec1.x - vec2.x);
+  return Math.atan2(vec1.y, vec1.x) - Math.atan2(vec2.y, vec2.x);
 }
 
 function vecEMA(vec1, vec2, weight) {
@@ -51,6 +51,11 @@ function vecEMA(vec1, vec2, weight) {
     x: (vec1.x*(1-weight) + vec2.x*weight), 
     y: (vec1.y*(1-weight) + vec2.y*weight) 
   };
+}
+
+// edge length from right angle triangle
+function lenFromRATri(hyp, len) {
+  return Math.pow(Math.pow(hyp, 2) - Math.pow(len, 2), 0.5);
 }
 
 // Line closest point

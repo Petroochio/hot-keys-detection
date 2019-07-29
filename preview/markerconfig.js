@@ -1,5 +1,5 @@
 const MARKER_COUNT = 50;
-const MARKER_TIMEOUT = 100;
+const MARKER_TIMEOUT = 300;
 const CENTER_SMOOTH_THRESHOLD = 1;
 const CORNER_SMOOTH_THRESHOLD = 3;
 const SMOOTH_HEAVY = 0.05; // 0-1, lower the value to get more smoothing

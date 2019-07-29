@@ -131,6 +131,20 @@
           color: rgba(0, 200, 200, 1.0);
       }
 
+      #canvasGrid {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+      }
+
+      #canvas {
+          position: absolute;
+          top: 0;
+          left: 0;
+          background: none;
+      }
+
     </style>
   </head>
 
@@ -139,6 +153,9 @@
 
     <div id="imageVis">
         <img id="imageGrid" src="">
+        <div id="canvasGrid">
+            <canvas id="canvas"></canvas>
+        </div>
         <div id="pointGrid"></div>
     </div>
 
@@ -217,8 +234,8 @@
                 <li>Click to select point to move
                     <ul>
                         <li>Click to move point to new position</li>
-                        <li>Use arrow keys for fine adjustment</li>
-                        <li>Esc deselects point</li>
+                        <li>Use [arrow keys] for fine adjustment</li>
+                        <li>[Esc] deselects point</li>
                     </ul>
                 </li>
                 <li>Move all points to match grid intersections</li>
@@ -228,7 +245,7 @@
                         <li>Paste cells text into CELLS_CALIBRATION variable in config.js</li>
                     </ul>
                 </li>
-                <li>You can also apply an existing QUADS_CALIBRATION to the points.</li>
+                <li>You can also apply an existing QUADS_CALIBRATION to the points</li>
             </ol>
         </div>
 
@@ -320,6 +337,8 @@
             var pg = document.getElementById('pointGrid');
             pg.style.width = imgW + 'px';
             pg.style.height = imgH + 'px';
+            c.width = imgW;
+            c.height = imgH;
         }
 
         function pointClicked(id) {
@@ -341,6 +360,7 @@
                 var index = pointSelected.x*(gridY+1) + pointSelected.y;
                 points[index].updatePos(mx, my);
             }
+            drawCanvasGrid();
         }
 
         function arrowPressed(mx, my) {
@@ -348,6 +368,7 @@
                 var index = pointSelected.x*(gridY+1) + pointSelected.y;
                 points[index].movePos(mx, my);
             }
+            drawCanvasGrid();
         }
 
         function handleFiles(e) {
@@ -363,6 +384,9 @@
                     resizePointGridDiv();
                     generateNewPoints();
                     imgLoaded = true;
+                    c.width = imgW;
+                    c.height = imgH;
+                    drawCanvasGrid();
                     updateWarning('Image loaded', false);
                 }, 1000);
             } else {
@@ -386,6 +410,34 @@
             }
 
             points.forEach(p => p.init('pointGrid'));
+        }
+
+        function drawCanvasGrid() {
+            if (imgLoaded) {
+                ctx.strokeStyle = "rgba(0, 200, 0, 0.5";
+                ctx.lineWidth = 2;
+                ctx.clearRect(-10, -10, imgW+20, imgH+20);
+                for (var i=0; i<=gridX; i++) {
+                    ctx.beginPath();
+                    var index = i*(gridY+1);
+                    ctx.moveTo(points[index].pos.x*imgW, points[index].pos.y*imgH);
+                    for (var j=0; j<=gridY; j++) {
+                        index = i*(gridY+1) + j;
+                        ctx.lineTo(points[index].pos.x*imgW, points[index].pos.y*imgH);
+                    }
+                    ctx.stroke();
+                }
+                for (var j=0; j<=gridY; j++) {
+                    ctx.beginPath();
+                    var index = j;
+                    ctx.moveTo(points[index].pos.x*imgW, points[index].pos.y*imgH);
+                    for (var i=0; i<=gridX; i++) {
+                        index = i*(gridY+1) + j;
+                        ctx.lineTo(points[index].pos.x*imgW, points[index].pos.y*imgH);
+                    }
+                    ctx.stroke();
+                }
+            }
         }
 
         function zoomIn() {
@@ -415,6 +467,7 @@
             imgH = document.getElementById('imageGrid').height;
             resizePointGridDiv();
             points.forEach(p => p.resize());
+            drawCanvasGrid();
         }
 
         var warningTimeout;
@@ -494,6 +547,7 @@
                             points[index].update(cal[i][j].x, cal[i][j].y);
                         }
                     }
+                    drawCanvasGrid();
                 } else {
                     updateWarning('incorrect number of rows and columns', true);
                 }
@@ -520,6 +574,8 @@
             }
         }
 
+
+        var c, ctx;
         window.onload = function() {
             document.getElementById('loadImage').addEventListener('change', handleFiles, false);
             document.getElementById('buttonZoomIn').addEventListener('click', zoomIn);
@@ -535,6 +591,10 @@
                 my = my - elePos.top;
                 windowClicked(mx, my);
             });
+
+            c = document.getElementById('canvas');
+            ctx = c.getContext('2d');
+            ctx.translate(0.5, 0.5);
         };
 
         window.onresize = resizeGrid;

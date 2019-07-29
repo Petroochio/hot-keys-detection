@@ -96,6 +96,7 @@ class Button {
 //----------------------------------------------
 
 const TOGGLE_EMA = 0.8;
+const TOGGLE_TIMOUT = 100;
 
 class Toggle {
     constructor(markerData, config) {
@@ -104,6 +105,7 @@ class Toggle {
 
         this.anchor = markerData[config.anchor];
         this.actor = markerData[config.actor];
+        this.actor.timeout = TOGGLE_TIMOUT;
         this.anchor.inuse = true;
         this.actor.inuse = true;
 
@@ -138,7 +140,7 @@ class Toggle {
             
             //   v0 __v01__ v1
             //     |   |   |
-            //  v30|---|---|v12
+            //  v30|   |   |v12
             //     |___|___|
             //   v3   v23   v2
 
@@ -169,11 +171,19 @@ class Toggle {
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.moveTo(v0.x, v0.y);
-            ctx.lineTo(v01.x, v01.y);
-            ctx.lineTo(v23.x, v23.y);
-            ctx.lineTo(v3.x, v3.y);
-            ctx.lineTo(v0.x, v0.y);
+            if (this.actor.present) {
+                ctx.moveTo(v0.x, v0.y);
+                ctx.lineTo(v01.x, v01.y);
+                ctx.lineTo(v23.x, v23.y);
+                ctx.lineTo(v3.x, v3.y);
+                ctx.lineTo(v0.x, v0.y);
+            } else {
+                ctx.moveTo(v1.x, v1.y);
+                ctx.lineTo(v01.x, v01.y);
+                ctx.lineTo(v23.x, v23.y);
+                ctx.lineTo(v2.x, v2.y);
+                ctx.lineTo(v1.x, v1.y);
+            }
             ctx.fill();
 
             ctx.textAlign = "left";
@@ -192,7 +202,7 @@ class Toggle {
 // KNOB CLASS
 //----------------------------------------------
 
-const KNOB_EMA = 0.8;
+const KNOB_EMA = 0.5;
 
 class Knob {
     constructor(markerData, config) {
@@ -214,9 +224,7 @@ class Knob {
     }
 
     update() {
-        const vActor = vecAngleBetween(vecSub(this.actor.center, this.actor.corner), {x:1, y:0});
-        const vAnchor = vecAngleBetween(vecSub(this.anchor.center, this.anchor.corner), {x:1, y:0});
-        const v = (vActor - vAnchor) + Math.PI - this.angleOffset;
+        const v = (vecAngleBetween(vecSub(this.actor.center, this.actor.corner), vecSub(this.anchor.center, this.anchor.corner)) + Math.PI - this.angleOffset)%(2*Math.PI);
         this.val = this.val * (1-KNOB_EMA) + v * KNOB_EMA;
 
         const cenVecNoRot = vecScale(vecUnit(vecSub(this.anchor.center, this.actor.center)), this.center.mag);
@@ -280,25 +288,31 @@ class Slider {
         this.val = 0;
         this.startLength = config.startLength;
         this.endLength = config.endLength;
-        this.center = { angle: config.centerAngle, mag: config.centerMag };
+        this.cornerToTrackAnglePerp = config.cornerToTrackAnglePerp;
+        this.anchorToTrackDist = config.anchorToTrackDist;
         this.width = config.width;
         this.height = config.height;
+        this.trackDir = config.trackDir;
 
-        this.startPosB = { x: 0, y: 0 };
         this.pos = { x: 0, y: 0 }; // screen units
         this.angle = 0;
         this.direction = config.direction;
     }
 
     update() {
-        const cenVecNoRot = vecScale(vecUnit(vecSub(this.anchor.center, this.anchor.corner)), this.center.mag);
-        const cenVecRot = vecRot(cenVecNoRot, this.center.angle);
-        const cenPos = vecAdd(this.anchor.center, cenVecRot);
-        this.pos = mapToScreen(cenPos);
-        this.angle = vecAngleBetween(cenVecRot, {x:1, y:0});
+        const unitVecToTrack = vecRot(vecUnit(vecSub(this.anchor.center, this.anchor.corner)), this.cornerToTrackAnglePerp);
+        const vecToTrack = vecScale(unitVecToTrack, this.anchorToTrackDist);
+        const footToStartLen = lenFromRATri(this.startLength, this.anchorToTrackDist);
+        const footToMidLen = footToStartLen + (this.endLength - this.startLength)/2;
+        const trackVec = vecRot(unitVecToTrack, this.trackDir*Math.PI/2);
+        const cenVec = vecAdd(vecToTrack, vecScale(trackVec, footToMidLen));
 
-        const distance = vecMag(vecSub(this.anchor.center, this.actor.center));
-        let v = ((distance - this.startLength) / (this.endLength - this.startLength));
+        // console.log(vecUnit(trackVec));
+        
+        this.pos = mapToScreen(vecAdd(this.anchor.center, cenVec));
+        this.angle = vecAngleBetween(trackVec, {x:1, y:0});
+        const distance = lenFromRATri(vecMag(vecSub(this.anchor.center, this.actor.center)), this.anchorToTrackDist) - footToStartLen;
+        let v = (distance / (this.endLength - this.startLength));
         v = v > 1 ? 1 : v < 0 ? 0 : v;
         if (!isNaN(v)) {
             this.val = this.val * (1-SLIDER_EMA) + v * SLIDER_EMA;
@@ -352,11 +366,6 @@ class Slider {
             ctx.textBaseline = "middle";
             ctx.fillText(this.name, textPos.x, textPos.y);
 
-            ctx.restore();
-
-            ctx.save();
-            ctx.fillStyle = "red";
-            ctx.fillRect(this.startPosB.x, this.startPosB.y, 5, 5);
             ctx.restore();
         }
     }

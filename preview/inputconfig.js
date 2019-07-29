@@ -35,10 +35,11 @@ const INPUT_CONFIG = [
         name: 'SLIDER',
         anchor: 0,
         actor: 1,
-        startLength: 26,
-        endLength: 85,
-        centerAngle: Math.PI*1.75, 
-        centerMag: 60, 
+        startLength: 26, // hypotenuse
+        endLength: 85, // hypotenuse
+        cornerToTrackAnglePerp: Math.PI*1.25, 
+        trackDir: 1, // -1 or 1 
+        anchorToTrackDist: 0,
         width: 40,
         height: 100,
         direction: 1
@@ -53,4 +54,7 @@ const INPUT_CONFIG = [
 // 0 ___  1 ___  2 ___  3 ___
 //  |X| |  |XXX|  | |X|  |___|
 //  |X|_|  |___|  |_|X|  |XXX|
+
+
+
 
