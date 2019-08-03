@@ -12,36 +12,75 @@ import asyncio
 from aiohttp import web
 import socketio
 
+# file io stuff
+import os.path
+
 # CV STUFF
+cap = None
+camID = 0
+camData = None
 
 # set aruco dictionary
 dictionary_name = aruco.DICT_4X4_50
 dictionary = aruco.getPredefinedDictionary(dictionary_name)
 
 cameraParameters = aruco.DetectorParameters_create()
-# Thresholding
-cameraParameters.adaptiveThreshWinSizeMin = 3 # >= 3
-cameraParameters.adaptiveThreshWinSizeStep = 3 # 10
-cameraParameters.adaptiveThreshConstant = 7 # 7
-# Contour Filtering
-cameraParameters.minMarkerPerimeterRate = 0.03 # 0.03
-cameraParameters.maxMarkerPerimeterRate = 0.2 # 4.0
-cameraParameters.minCornerDistanceRate = 0.2 # 0.05
-cameraParameters.minMarkerDistanceRate = 0.3 # 0.05
-cameraParameters.minDistanceToBorder = 5 # 3
-# Bits Extraction
-cameraParameters.markerBorderBits = 1 # 1
-cameraParameters.minOtsuStdDev = 5.0 # 5.0
-cameraParameters.perspectiveRemoveIgnoredMarginPerCell = 0.4 # 0.13
-# parameters.perpectiveRemovePixelPerCell = 10 # 4
-# Marker Identification
-cameraParameters.maxErroneousBitsInBorderRate = 0.63 # 0.35
-cameraParameters.errorCorrectionRate = 2.8 # 0.6
+
+def write_camera_params():
+  global camID
+  global cameraParameters
+
+  params = {
+    'camID': camID,
+
+    'adaptiveThreshWinSizeMin': cameraParameters.adaptiveThreshWinSizeMin,
+    'adaptiveThreshWinSizeStep': cameraParameters.adaptiveThreshWinSizeStep,
+    'adaptiveThreshConstant': cameraParameters.adaptiveThreshConstant,
+
+    'minMarkerPerimeterRate': cameraParameters.minMarkerPerimeterRate,
+    'maxMarkerPerimeterRate': cameraParameters.maxMarkerPerimeterRate,
+    'minCornerDistanceRate': cameraParameters.minCornerDistanceRate,
+    'minMarkerDistanceRate': cameraParameters.minMarkerDistanceRate,
+    'minDistanceToBorder': cameraParameters.minDistanceToBorder,
+
+    'markerBorderBits': cameraParameters.markerBorderBits,
+    'minOtsuStdDev': cameraParameters.minOtsuStdDev,
+    'perspectiveRemoveIgnoredMarginPerCell': cameraParameters.perspectiveRemoveIgnoredMarginPerCell,
+
+    'maxErroneousBitsInBorderRate': cameraParameters.maxErroneousBitsInBorderRate,
+    'errorCorrectionRate': cameraParameters.errorCorrectionRate
+  }
+
+  file = open('configs/camera.txt', 'w')
+  file.write(str(params))
+  file.close()
+
+def load_camera_config():
+  file = open('configs/camera.txt', 'r') 
+  config = file.read()
+  params = eval(config)
+
+  camID = params['camID']
+  # Thresholding
+  cameraParameters.adaptiveThreshWinSizeMin = params['adaptiveThreshWinSizeMin']
+  cameraParameters.adaptiveThreshWinSizeStep = params['adaptiveThreshWinSizeStep']
+  cameraParameters.adaptiveThreshConstant = params['adaptiveThreshConstant']
+  # Contour Filtering
+  cameraParameters.minMarkerPerimeterRate = params['minMarkerPerimeterRate']
+  cameraParameters.maxMarkerPerimeterRate = params['maxMarkerPerimeterRate']
+  cameraParameters.minCornerDistanceRate = params['minCornerDistanceRate']
+  cameraParameters.minMarkerDistanceRate = params['minMarkerDistanceRate']
+  cameraParameters.minDistanceToBorder = params['minDistanceToBorder']
+  # Bits Extraction
+  cameraParameters.markerBorderBits = params['markerBorderBits']
+  cameraParameters.minOtsuStdDev = params['minOtsuStdDev']
+  cameraParameters.perspectiveRemoveIgnoredMarginPerCell = params['perspectiveRemoveIgnoredMarginPerCell']
+  # parameters.perpectiveRemovePixelPerCell = 10 # 4
+  # Marker Identification
+  cameraParameters.maxErroneousBitsInBorderRate = params['maxErroneousBitsInBorderRate']
+  cameraParameters.errorCorrectionRate = params['errorCorrectionRate']
 
 # init camera
-cap = None
-camID = 0
-camData = None
 def init_camera():
   global cap
   global camID
@@ -65,12 +104,6 @@ def get_keys():
   corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, dictionary, parameters=cameraParameters)
   camImage = frame
   camData = (corners, ids, rejectedImgPoints)
-  # frame = aruco.drawDetectedMarkers(frame, corners, ids, borderColor=(0, 0, 255))
-  # frame = aruco.drawDetectedMarkers(frame, rejectedImgPoints, borderColor=(0, 255, 0))
-
-  # # Encode Image for sending
-  # ret, buffer = cv2.imencode('.jpg', cv2.resize(frame, (640, 360)))
-  # image = base64.b64encode(buffer).decode('utf-8')
 
   # If no Ids are found create an empty array
   if ids is None:
@@ -155,6 +188,14 @@ async def index(request):
 def connect(sid, environ):
   print("connect ", sid)
 
+@sio.on('get camera config')
+async def get_params(sid):
+  file = open('configs/camera.txt', 'r') 
+  config = file.read()
+  params = eval(config)
+
+  await sio.emit('send camera config', params)
+
 @sio.on('set attribute')
 def set_attribute(sid, data):
   global cameraParameters
@@ -166,6 +207,8 @@ def set_attribute(sid, data):
   elif (isinstance(param, float)):
     print("Set param '" + data['attr'] + "' to: " + str(float(data['value'])))
     setattr(cameraParameters, data['attr'], float(data['value']))
+  
+  write_camera_params()
 
 @sio.on('set camera')
 def set_camera(sid, data):
@@ -184,6 +227,36 @@ def stop_detection(sid):
     detectionThread.stop()
     print('Detection Stopped')
 
+@sio.on('get uv config')
+async def get_uv_config(sid):
+  config = 'ERROR NO CONFIG'
+  if (os.path.isfile('configs/uvs.txt')):
+    file = open('configs/uvs.txt', 'r') 
+    config = file.read()
+  await sio.emit('send uv config', { 'config': config })
+
+@sio.on('set uv config')
+def set_uv_config(sid, data):
+  # write data['config'] to file
+  file = open('configs/uvs.txt', 'w')
+  file.write(data['config'])
+  file.close()
+
+@sio.on('get inputs config')
+async def get_inputs_config(sid):
+  config = 'ERROR NO CONFIG'
+  if (os.path.isfile('configs/inputs.txt')):
+    file = open('configs/intpus.txt', 'r') 
+    config = file.read()
+  await sio.emit('send uv config', { 'config': config })
+
+@sio.on('set inputs config')
+def set_uv_config(sid, data):
+  # write data['config'] to file
+  file = open('configs/inputs.txt', 'w')
+  file.write(data['config'])
+  file.close()
+
 @sio.on('disconnect')
 def disconnect(sid):
   print('disconnect ', sid)
@@ -192,6 +265,7 @@ app.router.add_get('/', index)
 app.router.add_static('/static/', path=str('./preview'), name='static')
 
 if __name__ == '__main__':
+  load_camera_config()
   init_camera()
   detectionThread = sio.start_background_task(target=detection_loop)
   imageThread = sio.start_background_task(target=image_loop)

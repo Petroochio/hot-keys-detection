@@ -146,6 +146,7 @@
       }
 
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
   </head>
 
   <body>
@@ -575,7 +576,7 @@
         }
 
 
-        var c, ctx;
+        let c, ctx, socket;
         window.onload = function() {
             document.getElementById('loadImage').addEventListener('change', handleFiles, false);
             document.getElementById('buttonZoomIn').addEventListener('click', zoomIn);
@@ -595,12 +596,22 @@
             c = document.getElementById('canvas');
             ctx = c.getContext('2d');
             ctx.translate(0.5, 0.5);
+
+            socket = io('localhost:5000');
+            socket.on('send uv config', console.log)
         };
 
         window.onresize = resizeGrid;
 
         window.onkeydown = function(e) {
+            console.log(e.key)
             switch(e.key) {
+                case 's':
+                    socket.emit('get uv config');
+                    break;
+                case 'S':
+                    socket.emit('set uv config', { config: 'data \r\n moar' });
+                    break;
                 case 'ArrowLeft': //left
                     e.preventDefault();
                     arrowPressed(-1, 0);
@@ -630,7 +641,6 @@
                     break;
             }
         }
-
     </script>
   </body>
 </html>
