@@ -1,8 +1,8 @@
 const SCREEN = {
-    rx: 117, // mm (real world dimensions)
-    ry: 70, // mm (real world dimensions)
-    rw: (35+10/16)*25.4, // mm (real world dimensions)
-    rh: (22+7/16)*25.4, // mm (real world dimensions)
+    rx: (4+14/16)*25.4, // mm (real world dimensions)
+    ry: (3+14/16)*25.4, // mm (real world dimensions)
+    rw: (35+12/16)*25.4, // mm (real world dimensions)
+    rh: (22+0/16)*25.4, // mm (real world dimensions)
     w: window.innerWidth, // px (screen resolution)
     h: window.innerHeight, // px (screen resolution)
 };

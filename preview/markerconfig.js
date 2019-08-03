@@ -36,11 +36,11 @@ class Marker {
     }
 
     checkPresence(timenow) {
-        this.present = timenow - this.timestamp > this.timeout ? false : true;
+        this.present = (timenow - this.timestamp) > this.timeout ? false : true;
     }
 
     display(size) {
-        if (this.present && this.inuse) {
+        if (this.present && !this.inuse) {
             const posCen = mapToScreen(this.center);
             const posCor = mapToScreen(this.corner);
             const vecCenCor0 = vecUnit(vecSub(posCen, posCor));

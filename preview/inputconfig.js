@@ -1,7 +1,7 @@
 const INPUT_CONFIG = [
     {
         type: 'BUTTON',
-        name: 'START ?',
+        name: 'BUTTON',
         anchor: 8,
         actor: 7,
         threshold: 0.25,
@@ -35,14 +35,14 @@ const INPUT_CONFIG = [
         name: 'SLIDER',
         anchor: 0,
         actor: 1,
-        startLength: 26, // hypotenuse
-        endLength: 85, // hypotenuse
-        cornerToTrackAnglePerp: Math.PI*1.25, 
-        trackDir: 1, // -1 or 1 
-        anchorToTrackDist: 0,
+        angleAnchorStart: Math.PI*1.75, // angle between vec(anchor center -> corner) and vec(anchor center -> start center)
+        distAnchorStart: 26, // distance between anchor center and start center
+        angleAnchorEnd: Math.PI*1.75, // angle between vec(anchor center -> corner) and vec(anchor center -> end center)
+        distAnchorEnd: 85, // distance between anchor center and end center
+        angleAnchorCen: Math.PI*1.75, // angle between vec(anchor center -> corner) and vec(anchor center -> center of vis)
+        distAnchorCen: 60, // distance between anchor center and center of vis
         width: 40,
         height: 100,
-        direction: 1
     },
 ];
 

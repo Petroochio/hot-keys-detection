@@ -18,6 +18,11 @@ function init() {
   c.height = window.innerHeight;
   ctx = c.getContext('2d');
   ctx.translate(0.5, 0.5);
+  ctx.fillStyle = 'rgba(255, 255, 255, 1.0)';
+  ctx.strokeStyle = 'rgba(255, 255, 255, 1.0)';
+  ctx.font = "13px sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
 
   app.markerImage = document.querySelector('#marker-image');
 
@@ -98,20 +103,14 @@ function animate() {
 
 function updateVis() {
 
-  inputs.forEach(input => input.update());
-
-  ctx.fillStyle = 'rgba(255, 255, 255, 1.0)';
-  ctx.strokeStyle = 'rgba(255, 255, 255, 1.0)';
-  ctx.font = "13px sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
+  let timenow = Date.now();
+  markerData.forEach(m => m.checkPresence(timenow));
 
   ctx.clearRect(-10, -10, window.innerWidth+10, window.innerHeight+10);
-  let timenow = Date.now();
 
-  markerData.forEach(m => m.checkPresence(timenow));
-  markerData.forEach(m => m.display(90));
-
+  // markerData.forEach(m => m.display(90));
+  
+  inputs.forEach(input => input.update());
   inputs.forEach(input => input.display());
 
 }
