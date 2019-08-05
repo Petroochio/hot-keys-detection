@@ -528,9 +528,16 @@
                 }
                 var time = Date.now();
                 var quadArrString = JSON.stringify(quadArr);
-                download(quadArrString, 'quads'+time, 'txt');
                 var cellArrString = JSON.stringify(cellArrTemp);
-                download(cellArrString, 'cells'+time, 'txt');
+                socket.emit(
+                    'set uv config',
+                    {
+                        config: {
+                            cells: cellArrString,
+                            quads: quadArrString,
+                        }
+                    });
+
                 updateWarning('Calibration files downloaded', true);
             } else {
                 updateWarning('No calibration image loaded', true);
@@ -598,19 +605,15 @@
             ctx.translate(0.5, 0.5);
 
             socket = io('localhost:5000');
-            socket.on('send uv config', console.log)
+            socket.on('send uv config', console.log);
         };
 
         window.onresize = resizeGrid;
 
         window.onkeydown = function(e) {
-            console.log(e.key)
             switch(e.key) {
                 case 's':
                     socket.emit('get uv config');
-                    break;
-                case 'S':
-                    socket.emit('set uv config', { config: 'data \r\n moar' });
                     break;
                 case 'ArrowLeft': //left
                     e.preventDefault();
