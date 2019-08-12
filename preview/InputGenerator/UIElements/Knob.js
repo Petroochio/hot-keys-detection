@@ -4,9 +4,9 @@ export function createKnobState(inputID) {
   return {
     name: `Input ${inputID}`,
     type: 'KNOB',
-    actorID: -1, // unset
+    actorID: '', // unset
     detectWindow: 250,
-    relativePosition: 0, // unset
+    relativePosition: '', // unset
   }
 }
 

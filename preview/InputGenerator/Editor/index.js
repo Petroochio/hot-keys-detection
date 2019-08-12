@@ -1,6 +1,7 @@
 import { initMarkers } from '../Markers';
 import { pointInRect, avgCorners } from '../Utils';
-import { updateState, addStateListener } from '../DataStore';
+import { setState, addStateListener } from '../DataStore';
+import { checkPerspective, relativePosition } from './RelativePos';
 
 let canvas, ctx, socket, frame;
 let frameW, frameH;
@@ -8,7 +9,6 @@ let markerData;
 let state;
 
 function resize() {
-  const ui = document.querySelector('.input-group-div');
   frameW = window.innerWidth - 365;
   
   frame.width = frameW;
@@ -16,6 +16,35 @@ function resize() {
 
 function stateListener(newState) {
   state = newState;
+
+  // Set markers to be properly inuse
+  markerData.forEach((m) => {
+    m.inuse = false;
+
+    state.inputGroups.forEach((group, gID) => {
+      const { anchorID, inputs } = group;
+      // first check anchor
+      if (anchorID === m.id) {
+        m.type = 'ANCHOR';
+        m.groupID = gID;
+        m.actorID = -1; // Unset
+        m.inuse = true;
+        m.timeout = group.detectWindow;
+      }
+      else {
+        // then check inputs
+        inputs.forEach((input, iID) => {
+          if (m.id === input.actorID) {
+            m.type = 'ACTOR';
+            m.groupID = gID;
+            m.inputID = iID;
+            m.inuse = true;
+            m.timeout = input.detectWindow;
+          }
+        });
+      }
+    });
+  });
 }
 
 function update() {
@@ -30,13 +59,15 @@ function update() {
     case 'ACTOR_REL_POS':
       const { group, input } = tools.targetData;
       const anchor = markerData[inputGroups[group].anchorID];
-      const actor = markerData[inputGroups[group].actors[input].actorID];
+      const actor = markerData[inputGroups[group].inputs[input].actorID];
 
       if (anchor.present && actor.present) {
         if (checkPerspective(anchor, actor, 0.01, 0.0002)) {
+          console.log(anchor.center);
           const relPos = relativePosition(anchor, actor, 19);
+          console.log(relPos);
           tools.toolMode = 'NONE';
-          inputGroups[group].actors[input].relativePosition = relPos;
+          inputGroups[group].inputs[input].relativePosition = relPos;
           setState(state);
         }
       }
@@ -73,9 +104,19 @@ export default function initEditor() {
       case 'ANCHOR_SELECT':
         markerData.forEach(m => {
           if (hitMarker(m)) {
-            m.inuse = true;
             tools.toolMode = 'NONE';
             inputGroups[tools.targetData].anchorID = m.id;
+            setState(state);
+          }
+        });
+        break;
+      case 'ACTOR_SELECT':
+        const { group, input } = tools.targetData;
+
+        markerData.forEach(m => {
+          if (hitMarker(m)) {
+            tools.toolMode = 'NONE';
+            inputGroups[group].inputs[input].actorID = m.id;
             setState(state);
           }
         });

@@ -4,9 +4,9 @@ export function createButtonState(inputID) {
   return {
     name: `Input ${inputID}`,
     type: 'BUTTON',
-    actorID: -1, // unset
+    actorID: '', // unset
     detectWindow: 250,
-    relativePosition: 0, // unset
+    relativePosition: '', // unset
   }
 }
 
@@ -53,7 +53,7 @@ export function Button(inputID, groupID, inputState, toolState, setInputState, s
         h('input',
           {
             on: { click: selectActor },
-            props: { type: 'number', step: 1, value: actorID >= 0 ? actorID : '' }
+            props: { type: 'number', step: 1, value: actorID }
           }
         )
       ),
@@ -89,9 +89,10 @@ export function Button(inputID, groupID, inputState, toolState, setInputState, s
   };
   const relativePosition = h(
     'li.parameter.input-group.param-actor-rp',
+    { on: { click: setRelPos } },
     [
       h('span.param-type', 'relative position'),
-      h('span.param-value', { on: { click: setRelPos } }, inputState.relativePosition),
+      h('span.param-value', inputState.relativePosition),
     ]
   );
 

@@ -24,7 +24,7 @@ class Marker {
       this.shouldFill = false;
       this.type = ''; // ANCHOR or ACTOR
       this.groupID = -1; // -1 is unset
-      this.actorID = -1; // Only set for actor type marker
+      this.inputID = -1; // Only set for actor type marker
     }
 
     update(marker, timenow) {

@@ -4,9 +4,9 @@ export function createSliderState(inputID) {
   return {
     name: `Input ${inputID}`,
     type: 'SLIDER',
-    actorID: -1, // unset
+    actorID: '', // unset
     detectWindow: 250,
-    relativePosition: 0, // unset
+    relativePosition: '', // unset
   }
 }
 
