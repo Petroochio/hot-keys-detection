@@ -102,98 +102,16 @@
       #frame, #interface {
         display: block;
         position: absolute;
-        right: 200px;
+        left: 365px;
       }
     </style>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
-    <script src="./Utils.js"></script>
-    <script src="./Markers.js"></script>
-    <script src="./HTMLGenerator.js"></script>
-    <script src="./index.js"></script>
+    <script src="./build/app.js"></script>
   </head>
 
   <body>
-    <section id="ui">
-        <div class="input-group-div">
-            <!-- <ul class="input-group-list">
-                <li class="parameter input-group param-name input-group-name">
-                    <span class="param-type">InputGroup</span>
-                    <span class="param-value"><input type="text" value="input_group_0"></span>
-                </li>
-                <li class="parameter input-group param-anchor">
-                    <span class="param-type">anchor ID</span>
-                    <span class="param-value"><input type="number" step="1" value="0"></span>
-                </li>
-                <li class="parameter input-group param-anchor-dw">
-                    <span class="param-type">anchor detection window</span>
-                    <span class="param-value"><input type="number" step="1" value="250"></span>
-                    <span class="param-unit">ms</span>
-                </li>
-
-                <li class="parameter input-object">
-                    <ul>
-                        <li class="parameter input param-input-type">
-                            <span class="param-value">
-                                <select>
-                                    <option value="none">Select Input Type</option>
-                                    <option value="button" selected>Button</option>
-                                    <option value="toggle">Toggle</option>
-                                    <option value="knob">Knob</option>
-                                    <option value="slider">Slider</option>
-                                </select>
-                            </span>
-                            <span class="param-value input-name"><input type="text" value="Button0"></span>
-                        </li>
-                        <li class="parameter input-group param-actor">
-                            <span class="param-type">actor ID</span>
-                            <span class="param-value"><input type="number" step="1" value="0"></span>
-                        </li>
-                        <li class="parameter input-group param-actor-dw">
-                            <span class="param-type">actor detection window</span>
-                            <span class="param-value"><input type="number" step="1" value="250"></span>
-                            <span class="param-unit">ms</span>
-                        </li>
-                        <li class="parameter input-group param-actor-rp">
-                            <span class="param-type">relative position</span>
-                            <span class="param-value">&#128247;</span>
-                        </li>
-                    </ul>
-                </li>
-
-                <li class="parameter input-object">
-                    <ul>
-                        <li class="parameter input param-input-type">
-                            <span class="param-value">
-                                <select>
-                                    <option value="none">Select Input Type</option>
-                                    <option value="button">Button</option>
-                                    <option value="toggle">Toggle</option>
-                                    <option value="knob">Knob</option>
-                                    <option value="slider">Slider</option>
-                                </select>
-                            </span>
-                            <span class="param-value input-name"><input type="text" value=""></span>
-                        </li>
-                        <li class="parameter input-group param-actor">
-                            <span class="param-type">actor ID</span>
-                            <span class="param-value"><input type="number" step="1" value="0"></span>
-                        </li>
-                        <li class="parameter input-group param-actor-dw">
-                            <span class="param-type">actor detection window</span>
-                            <span class="param-value"><input type="number" step="1" value="250"></span>
-                            <span class="param-unit">ms</span>
-                        </li>
-                        <li class="parameter input-group param-actor-rp">
-                            <span class="param-type">relative position</span>
-                            <span class="param-value">&#128247;</span>
-                        </li>
-                    </ul>
-                </li>
-            </ul> -->
-            <button id="add-input">add input</button>
-        </div>
-    </section>
+    <section id="ui"></section>
 
     <img id="frame"/>
     <canvas id="interface"></canvas>

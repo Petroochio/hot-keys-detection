@@ -1,9 +1,13 @@
+import { Vec2 } from './Utils';
+
 const MARKER_COUNT = 100;
 const MARKER_TIMEOUT = 300;
 const CENTER_SMOOTH_THRESHOLD = 1;
 const CORNER_SMOOTH_THRESHOLD = 3;
 const SMOOTH_HEAVY = 0.05; // 0-1, lower the value to get more smoothing
 const SMOOTH_LIGHT = 0.75;
+
+let ctx; // lazy fix
 
 class Marker {
     constructor(id) {
@@ -18,22 +22,25 @@ class Marker {
       this.centerSmoothThreshold = 1;
       this.cornerSmoothThreshold = 3;
       this.shouldFill = false;
+      this.type = ''; // ANCHOR or ACTOR
+      this.groupID = -1; // -1 is unset
+      this.actorID = -1; // Only set for actor type marker
     }
 
     update(marker, timenow) {
         if (this.present) {
-            const centerDelta = vecMag(vecSub(this.center, marker.center));
-            const cornerDelta = vecMag(vecSub(this.corner, marker.corner));
+            const centerDelta = Vec2.vecMag(Vec2.vecSub(this.center, marker.center));
+            const cornerDelta = Vec2.vecMag(Vec2.vecSub(this.corner, marker.corner));
             const centerSmooth = centerDelta > this.centerSmoothThreshold ? SMOOTH_LIGHT : SMOOTH_HEAVY;
             const cornerSmooth = cornerDelta > this.cornerSmoothThreshold ? SMOOTH_LIGHT : SMOOTH_HEAVY;
             this.timestamp = timenow;
-            this.center = vecEMA(this.center, marker.center, centerSmooth);
-            this.corner = vecEMA(this.corner, marker.corner, cornerSmooth);
+            this.center = Vec2.vecEMA(this.center, marker.center, centerSmooth);
+            this.corner = Vec2.vecEMA(this.corner, marker.corner, cornerSmooth);
 
             this.allCorners.forEach((c, i) => {
-              const cDelta = vecMag(vecSub(c, marker.allCorners[i]));
+              const cDelta = Vec2.vecMag(Vec2.vecSub(c, marker.allCorners[i]));
               const cSmooth = cDelta > this.cornerSmoothThreshold ? SMOOTH_LIGHT : SMOOTH_HEAVY;
-              const newC = vecEMA(c, marker.allCorners[i], cSmooth);
+              const newC = Vec2.vecEMA(c, marker.allCorners[i], cSmooth);
               c.x = newC.x;
               c.y = newC.y;
             });
@@ -52,17 +59,6 @@ class Marker {
 
     display(size) {
         if (this.present) {
-            // const posCen = mapToScreen(this.center);
-            // const posCor = mapToScreen(this.corner);
-            // const vecCenCor0 = vecUnit(vecSub(posCen, posCor));
-            // const vecCenCor1 = vecRot90(vecCenCor0);
-            // const vecCenCor2 = vecRot90(vecCenCor1);
-            // const vecCenCor3 = vecRot90(vecCenCor2);
-            // const cor0 = vecAdd(posCen, vecScale(vecCenCor0, size/2));
-            // const cor1 = vecAdd(posCen, vecScale(vecCenCor1, size/2));
-            // const cor2 = vecAdd(posCen, vecScale(vecCenCor2, size/2));
-            // const cor3 = vecAdd(posCen, vecScale(vecCenCor3, size/2));
-            
             // ctx is global
             ctx.beginPath();
             ctx.moveTo(Math.round(this.allCorners[0].x), Math.round(this.allCorners[0].y));
@@ -71,7 +67,7 @@ class Marker {
             ctx.lineTo(Math.round(this.allCorners[3].x), Math.round(this.allCorners[3].y));
             ctx.lineTo(Math.round(this.allCorners[0].x), Math.round(this.allCorners[0].y));
 
-            if (isSelectMode && this.inuse) ctx.fillStyle = '#ff0000';
+            if (this.inuse) ctx.fillStyle = '#ff0000';
 
             if (this.shouldFill) ctx.fill();
 
@@ -87,9 +83,11 @@ class Marker {
     }
 }
 
-function initMarkers() {
-    markerData = [];
+export function initMarkers(drawContext) {
+    ctx = drawContext;
+    const markerData = [];
     for (let i=0; i<MARKER_COUNT; i++) {
         markerData.push(new Marker(i));
     }
+    return markerData;
 }
