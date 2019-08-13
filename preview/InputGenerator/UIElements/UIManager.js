@@ -24,12 +24,11 @@ function renderDom(state) {
 
   const groups = inputGroups
     .map((g, i) => InputGroup(i, g, tools, setGroupState, setToolState));
-
   const addGroup = () => {
     inputGroups.push(createGroupState(inputGroups.length));
     setState({ inputGroups, tools });
   };
-  const addGroupButton = h('button.add-group', { on: { click: addGroup } }, 'add input');
+  const addGroupButton = h('button.add-group', { on: { click: addGroup } }, 'add input group');
   const newDom = h('div.input-group-div', [...groups, addGroupButton]);
   patch(lastDom, newDom);
   lastDom = newDom; // must do this bc snabbdom

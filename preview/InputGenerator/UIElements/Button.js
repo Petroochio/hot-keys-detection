@@ -96,5 +96,5 @@ export function Button(inputID, groupID, inputState, toolState, setInputState, s
     ]
   );
 
-  return h('ul', [inputTypeName, actor, detectWindow, relativePosition]);
+  return h('ul.input-element', [inputTypeName, actor, detectWindow, relativePosition]);
 }

@@ -95,5 +95,5 @@ export function Knob(inputID, groupID, inputState, toolState, setInputState, set
     ]
   );
 
-  return h('ul', [inputTypeName, actor, detectWindow, relativePosition]);
+  return h('ul.input-element', [inputTypeName, actor, detectWindow, relativePosition]);
 }

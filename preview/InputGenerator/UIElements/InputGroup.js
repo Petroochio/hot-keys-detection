@@ -24,7 +24,7 @@ export function InputGroup(groupID, groupState, toolState, setGroupState, setToo
   const name = h(
     'li.parameter.input-group.param-name.input-group-name',
     [
-      h('span.param-type', 'anchor ID'),
+      h('span.param-type', 'Input Group'),
       h('span.param-value',
         h('input',
           {
@@ -45,7 +45,8 @@ export function InputGroup(groupID, groupState, toolState, setGroupState, setToo
   const anchor = h(
     'li.parameter.input-group.param-anchor',
     [
-      h('span.param-type', 'Input Group'),
+      h('span.bullet', ''),
+      h('span.param-type', 'anchor ID'),
       h('span.param-value',
         h('input',
           {
@@ -65,6 +66,7 @@ export function InputGroup(groupID, groupState, toolState, setGroupState, setToo
   const detectWindow = h(
     'li.parameter.input-group.param-anchor-dw',
     [
+      h('span.bullet', ''),
       h('span.param-type', 'anchor detection window'),
       h('span.param-value',
         h('input',
@@ -103,8 +105,9 @@ export function InputGroup(groupID, groupState, toolState, setGroupState, setToo
     groupState.inputs.push(createGenericState(groupState.inputs.length));
     setGroupState(groupID, groupState);
   }
+  const bulletElement = h('span.bullet', '');
   const addInputButton = h('button.add-input', { on: { click: addInput } }, 'add input');
-  const actorParent = h('li.parameter.input-object', [...inputs, addInputButton]);
+  const actorParent = h('li.parameter.input-object', [...inputs, bulletElement, addInputButton]);
 
   // Whole assembly
   return h('ul.input-group-list', [name, anchor, detectWindow, actorParent]);

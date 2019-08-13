@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>front-end input generator</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      body, html {
+          font-family: sans-serif;
+          font-size: 12px;
+      }
+
+      ul {
+          background: rgba(0, 0, 0, 0.08);
+          list-style-type: none;
+          margin-bottom: 1em;
+          margin-top: 1.5em;
+          padding-bottom: 1em;
+          padding-top: 1.5em;
+          padding-left: 2em;
+          padding-right: 2em;
+          /* border-top: 1px solid rgba(0, 0, 0, 0.1);
+          border-left: 1px solid rgba(0, 0, 0, 0.1); */
+      }
+
+      li {
+          list-style-type: none;
+          margin-bottom: 0.5em;
+      }
+
+      input {
+          display: inline-block;
+          background: none;
+          border: none;
+          border-bottom: 1px dotted rgba(0, 0, 0, 0.5);
+          width: 3em;
+      }
+
+      .input-group-div {
+          position: relative;
+          float: left;
+          margin: 1em;
+      }
+
+      .param-type {
+          display: inline-block;
+          width: 15em;
+      }
+
+      span.right-angle {
+          display: inline-block;
+          width: 1em;
+          height: 1em;
+          border-left: 1px dotted rgba(0, 0, 0, 0.3);
+          border-bottom: 1px dotted rgba(0, 0, 0, 0.3);
+      }
+
+      /* Input group name */
+
+      .input-group-name {
+          margin-bottom: 1em;
+      }
+
+      .input-group-name .param-type {
+          width: 7em;
+          font-weight: 600;
+      }
+
+      .input-group-name .param-value input {
+          width: 10em;
+          font-size: 1.5em;
+          font-weight: 600;
+      }
+
+      /* input object */
+
+      .input-object .param-input-type .param-type {
+          width: 7em;
+          font-weight: 600;
+      }
+
+      .input-object .param-input-type select {
+          width: 8em;
+          font-size: 0.8em;
+      }
+
+      .input-object .param-input-name .param-type {
+          width: 7em;
+      }
+
+      .input-object .param-input-type .input-name input {
+          width: 12em;
+          font-weight: 600;
+          margin-left: 1em;
+      }
+
+      .input-object .param-type {
+          display: inline-block;
+          width: 13em;
+      }
+
+
+    </style>
+  </head>
+
+  <body>
+    
+    <div class="input-group-div">
+        <ul class="input-group-list">
+            <li class="parameter input-group param-name input-group-name">
+                <span class="param-type">InputGroup</span>
+                <span class="param-value"><input type="text" value="input_group_0"></span>
+            </li>
+            <li class="parameter input-group param-anchor">
+                <span class="right-angle"></span>
+                <span class="param-type">anchor ID</span>
+                <span class="param-value"><input type="number" step="1" value="0"></span>
+            </li>
+            <li class="parameter input-group param-anchor-dw">
+                <span class="right-angle"></span>
+                <span class="param-type">anchor detection window</span>
+                <span class="param-value"><input type="number" step="1" value="250"></span>
+                <span class="param-unit">ms</span>
+            </li>
+
+            <li class="parameter input-object">
+                <ul>
+                    <li class="parameter input param-input-type">
+                        <span class="param-value">
+                            <select>
+                                <option value="none">Select Input Type</option>
+                                <option value="button" selected>Button</option>
+                                <option value="toggle">Toggle</option>
+                                <option value="knob">Knob</option>
+                                <option value="slider">Slider</option>
+                            </select>
+                        </span>
+                        <span class="param-value input-name"><input type="text" value="Button0"></span>
+                    </li>
+                    <li class="parameter input-group param-actor">
+                        <span class="right-angle"></span>
+                        <span class="param-type">actor ID</span>
+                        <span class="param-value"><input type="number" step="1" value="0"></span>
+                    </li>
+                    <li class="parameter input-group param-actor-dw">
+                        <span class="right-angle"></span>
+                        <span class="param-type">actor detection window</span>
+                        <span class="param-value"><input type="number" step="1" value="250"></span>
+                        <span class="param-unit">ms</span>
+                    </li>
+                    <li class="parameter input-group param-actor-rp">
+                        <span class="right-angle"></span>
+                        <span class="param-type">relative position</span>
+                        <span class="param-value">&#128247;</span>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="parameter input-object">
+                    <ul>
+                        <li class="parameter input param-input-type">
+                            <span class="param-value">
+                                <select>
+                                    <option value="none">Select Input Type</option>
+                                    <option value="button">Button</option>
+                                    <option value="toggle">Toggle</option>
+                                    <option value="knob">Knob</option>
+                                    <option value="slider">Slider</option>
+                                </select>
+                            </span>
+                            <span class="param-value input-name"><input type="text" value=""></span>
+                        </li>
+                    </ul>
+                </li>
+
+        </ul>
+    </div>
+
+    <script>
+
+    </script>
+  </body>
+</html>

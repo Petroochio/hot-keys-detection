@@ -22,13 +22,51 @@
           padding-top: 1em;
           padding-left: 2em;
           padding-right: 2em;
-          border-top: 1px solid rgba(0, 0, 0, 0.1);
-          border-left: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
+      ul.input-element {
+        border-left: 1px dotted rgba(0, 0, 0, 0.3);
+        margin-top: 1.0em;
+        padding-top: 0.5em;
+        padding-bottom: 0.25em;
+      }
+
+      button {
+        border: none;
+        background: none;
+        padding: 0.1em 0.4em;
+        margin-top: 0.5em;
+        border: 1px solid rgba(0, 0, 0, 0.5);
+        border-radius: 0.3em;
+        cursor: pointer;
+        font-size: 0.9em;
+        color: rgba(0, 0, 0, 0.7);
+      }
+
+      button.add-group {
+        padding: 0.25em 0.4em;
+        margin-top: 1em;
+        font-size: 1.0em;
+        color: black;
+      }
+
+      button:hover {
+        background: rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(0, 0, 0, 1.0);
       }
 
       li {
           list-style-type: none;
           margin-bottom: 0.5em;
+      }
+
+      span.bullet {
+          display: inline-block;
+          width: 1em;
+          height: 1em;
+          margin-right: 0.5em;
+          border-left: 1px dotted rgba(0, 0, 0, 0.3);
+          border-bottom: 1px dotted rgba(0, 0, 0, 0.3);
       }
 
       input {
@@ -46,7 +84,7 @@
 
       .param-type {
           display: inline-block;
-          width: 15em;
+          width: 13em;
       }
 
       /* Input group name */
@@ -83,7 +121,7 @@
       }
 
       .input-object .param-input-type .input-name input {
-          width: 12em;
+          width: 11em;
           font-weight: 600;
           margin-left: 1em;
       }

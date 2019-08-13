@@ -59,5 +59,5 @@ export function GenericInput(inputID, groupID, inputState, toolState, setInputSt
   );
   const inputTypeName = h('li.parameter.input.param-input-type', [typeSelect, nameField]);
 
-  return h('ul', [inputTypeName]);
+  return h('ul.input-element', [inputTypeName]);
 }
