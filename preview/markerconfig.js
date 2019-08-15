@@ -11,10 +11,11 @@ class Marker {
         this.inuse = false;
         this.present = false;
         this.timestamp = 0;
-        this.timeout = MARKER_TIMEOUT,
-        this.center = {x:0, y:0},
-        this.corner = {x:0, y:0},
-        this.centerSmoothThreshold = 1,
+        this.timeout = MARKER_TIMEOUT;
+        this.center = {x:0, y:0};
+        this.corner = {x:0, y:0};
+        this.allCorners = [];
+        this.centerSmoothThreshold = 1;
         this.cornerSmoothThreshold = 3
     }
 
@@ -27,6 +28,7 @@ class Marker {
             this.timestamp = timenow;
             this.center = vecEMA(this.center, marker.center, centerSmooth);
             this.corner = vecEMA(this.corner, marker.corner, cornerSmooth);
+            this.allCorners = marker.allCorners.map((m) => (m));
         } else {
             this.present = true;
             this.timestamp = timenow;

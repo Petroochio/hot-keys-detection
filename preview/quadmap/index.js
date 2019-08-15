@@ -87,6 +87,11 @@ function ptInQuad(pt, quadArr) {
   }
 }
 
+const xaxis = {x:1, y:0};
+const yaxis = {x:0, y:1};
+const xaxisNeg = {x:-1, y:0};
+const yaxisNeg = {x:0, y:-1};
+
 function mapQuad(pt, quadArr) {
   // https://math.stackexchange.com/questions/13404/mapping-irregular-quadrilateral-to-a-rectangle
   const p0 = quadArr[0];
