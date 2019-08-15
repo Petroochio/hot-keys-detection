@@ -123,6 +123,8 @@ class TableInputGroup {
             w: -1,
             h: -1,
         };
+        this.angle = 0;
+        this.pos = {x:0, y:0};
     }
 
     calBoundingBox(markerOffsetSize) {
@@ -152,26 +154,26 @@ class TableInputGroup {
         this.boundingBox.w = xw + markerOffsetSize*2;
         this.boundingBox.h = yh + markerOffsetSize*2;
 
-        console.log(centerPts, xmax, xmin, ymax, ymin);
     }
 
     update() {
-        this.inputs.forEach((i) => i.update(this.anchor));
+        this.angle = vecAngleBetween(vecSub(this.anchor.center, this.anchor.corner), angleRefAxis) - CORNER_ANGLE;
+        this.pos = this.anchor.center;
+        this.inputs.forEach((i) => i.update(this));
     }
 
     display() {
         if (this.anchor.present) {
-            const screenPos = mapToScreen(this.anchor.center);
+            const screenPos = mapToScreen(this.pos);
             const bbPosX = unitToScreen(this.boundingBox.x);
             const bbPosY = unitToScreen(this.boundingBox.y);
             const bbw = unitToScreen(this.boundingBox.w);
             const bbh = unitToScreen(this.boundingBox.h);
-            const groupAngle = vecAngleBetween(vecSub(this.anchor.center, this.anchor.corner), angleRefAxis) - CORNER_ANGLE;
             ctx.save();
             ctx.textAlign = "left";
             ctx.textBaseline = "alphabetic";
             ctx.translate(screenPos.x, screenPos.y);
-            ctx.rotate(groupAngle);
+            ctx.rotate(this.angle);
             ctx.strokeRect(bbPosX, bbPosY, bbw, bbh);
             ctx.fillText(this.name, bbPosX, bbPosY - 5);
 
@@ -210,7 +212,7 @@ class Button {
         this.actor.inuse = true;
     }
 
-    update(anchor) {
+    update(parent) {
         const v = this.actor.present ? 1 : 0;
         this.val = calEMA(v, this.val, BUTTON_EMA);
     }
@@ -239,7 +241,7 @@ class Toggle {
         this.actor.inuse = true;
     }
 
-    update(anchor) {
+    update(parent) {
         const v = this.actor.present ? 1 : 0;
         this.val = calEMA(v, this.val, TOGGLE_EMA);
     }
@@ -269,11 +271,13 @@ class Knob {
         this.actor.inuse = true;
     }
 
-    update(anchor) {
-        const anchorVec = vecSub(anchor.center, anchor.corner);
-        const actorVec = vecSub(this.actor.center, this.actor.corner);
-        const angleBetween = -vecAngleBetween(anchorVec, actorVec);
-        this.val = calEMA(angleBetween, this.val, KNOB_EMA);
+    update(parent) {
+        if (this.actor.present) {
+            const anchorVec = vecSub(parent.anchor.center, parent.anchor.corner);
+            const actorVec = vecSub(this.actor.center, this.actor.corner);
+            const angleBetween = -vecAngleBetween(anchorVec, actorVec);
+            this.val = calEMA(angleBetween, this.val, KNOB_EMA);
+        }
     }
 
     display(x, y, w, h) {
@@ -316,19 +320,20 @@ class Slider {
         this.actor.inuse = true;
     }
 
-    update(anchor) {
-        const anchorAngle = vecAngleBetween(vecSub(anchor.center, anchor.corner), angleRefAxis) - CORNER_ANGLE;
-        const as = vecRot(vecScale(xaxis, this.start.distance), this.start.angle + anchorAngle);
-        const aa = vecSub(anchor.center, this.actor.center);
-        // debugVec(
-        //     mapToScreen(anchor.center),
-        //     mapToScreen(vecAdd(anchor.center, as)),
-        //     'red'
-        //     );
-        const len = vecMag(vecSub(as, aa));
-        const v = len / this.trackLength;
-        this.val = calEMA(v, this.val, SLIDER_EMA);
-        // console.log(len, this.trackLength);
+    update(parent) {
+        if (this.actor.present) {
+            const as = vecRot(vecScale(xaxis, this.start.distance), this.start.angle + parent.angle);
+            const aa = vecSub(parent.anchor.center, this.actor.center);
+            // debugVec(
+            //     mapToScreen(anchor.center),
+            //     mapToScreen(vecAdd(anchor.center, as)),
+            //     'red'
+            //     );
+            const len = vecMag(vecSub(as, aa));
+            let v = len / this.trackLength;
+            v = v > 1 ? 1 : v < 0 ? 0 : v; // constraining v between 0 to 1
+            this.val = calEMA(v, this.val, SLIDER_EMA);
+        }
     }
     
     display(x, y, w, h) {
