@@ -21,17 +21,18 @@ function init() {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
-  initMarkers();
-  initTableInput(dummyInputData);
-
   app.markerImage = document.querySelector('#marker-image');
 
   const socket = io('http://localhost:5000');
   app.socket = socket;
+  initMarkers();
 
   socket.on('connect', () => {
     console.log('connected to server');
+    socket.emit('get input config')
   });
+
+  socket.on('send input config', ({ config }) => initTableInput(JSON.parse(config)));
 
   const cornerToVec = (c) => ({ x: c[0], y: c[1] });
   const mapCornersToUV = (corners) => {
@@ -90,13 +91,14 @@ function initAnimation(fps) {
 }
 
 function animate() {
-  requestAnimationFrame(animate);
   timestamp = Date.now();
   var delta = timestamp - ptimestamp;
   if (delta > timeInterval) {
     ptimestamp = timestamp - (delta % timeInterval);
     updateVis();
   }
+
+  requestAnimationFrame(animate);
 }
 
 function updateVis() {
