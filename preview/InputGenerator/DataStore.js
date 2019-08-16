@@ -17,6 +17,11 @@ export function setState(newState) {
   propogate();
 }
 
+export function setInputState(newState) {
+  state.inputGroups = newState;
+  propogate();
+}
+
 export function addStateListener(f) {
   stateListeners.push(f);
   f(state); // push state to new listener

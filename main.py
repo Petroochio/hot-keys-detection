@@ -246,7 +246,7 @@ def set_uv_config(sid, data):
 async def get_inputs_config(sid):
   config = 'ERROR NO CONFIG'
   if (os.path.isfile('configs/inputs.txt')):
-    file = open('configs/intpus.txt', 'r') 
+    file = open('configs/inputs.txt', 'r') 
     config = file.read()
   await sio.emit('send inputs config', { 'config': config })
 

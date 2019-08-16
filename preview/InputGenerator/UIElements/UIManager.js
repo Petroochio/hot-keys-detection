@@ -7,13 +7,12 @@ const patch = snabbdom.init([ // Init patch function with chosen modules
   require('snabbdom/modules/eventlisteners').default, // attaches event listeners
 ]);
 
-import { addStateListener, setState } from '../DataStore';
+import { addStateListener, setState, setInputState } from '../DataStore';
 import { InputGroup, createGroupState } from './InputGroup';
 
 let root;
 let lastDom;
 let socket;
-
 
 // maybe put the socket in the state, idk
 function renderDom(state) {
@@ -37,7 +36,10 @@ function renderDom(state) {
   const save = () => socket.emit('set inputs config', { config: JSON.stringify(state.inputGroups) });
   const saveButton = h('button.add-group', { on: { click: save } }, 'save input config');
 
-  const newDom = h('div.input-group-div', [...groups, addGroupButton, saveButton]);
+  const load = () => socket.emit('get inputs config');
+  const loadButton = h('button.add-group', { on: { click: load } }, 'load input config');
+
+  const newDom = h('div.input-group-div', [...groups, addGroupButton, saveButton, loadButton]);
   patch(lastDom, newDom);
   lastDom = newDom; // must do this bc snabbdom
 }
@@ -48,4 +50,5 @@ export default function init(sock) {
   patch(root, lastDom);
   addStateListener(renderDom);
   socket = sock;
+  socket.on('send inputs config', ({ config }) => setInputState(JSON.parse(config)));
 }
