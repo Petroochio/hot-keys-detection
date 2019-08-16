@@ -130,6 +130,7 @@ class TableInputGroup {
     calBoundingBox(markerOffsetSize) {
         
         let centerPts = this.inputs.map((i) => vecRot(vecScale(xaxis, i.relativePosition.distance), -i.relativePosition.angle));
+        centerPts.push({x:0, y:0});
 
         // centerPts.forEach(p => {
         //     debugVec(
@@ -140,13 +141,13 @@ class TableInputGroup {
         // });
         
         centerPts.sort((a, b) => (a.x - b.x));
-        const xmax = centerPts[centerPts.length-1].x > 0 ? centerPts[centerPts.length-1].x : 0;
-        const xmin = centerPts[0].x < 0 ? centerPts[0].x : 0;
+        const xmax = centerPts[centerPts.length-1].x;
+        const xmin = centerPts[0].x;
         const xw = xmax - xmin;
         
         centerPts.sort((a, b) => (a.y - b.y));
-        const ymax = centerPts[centerPts.length-1].y > 0 ? centerPts[centerPts.length-1].y : 0;
-        const ymin = centerPts[0].y < 0 ? centerPts[0].y : 0;
+        const ymax = centerPts[centerPts.length-1].y;
+        const ymin = centerPts[0].y;
         const yh = ymax - ymin;
         
         this.boundingBox.x = xmin - markerOffsetSize;
@@ -187,7 +188,7 @@ class TableInputGroup {
                 const w = i.type==='SLIDER' ? slideVisW : visW;
                 i.display(visX, visY, w, visH);
                 visX = visX + w + visGap;
-            })
+            });
             ctx.restore();
         }
     }
