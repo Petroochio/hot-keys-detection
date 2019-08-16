@@ -29,10 +29,10 @@ function init() {
 
   socket.on('connect', () => {
     console.log('connected to server');
-    socket.emit('get input config')
+    socket.emit('get inputs config')
   });
 
-  socket.on('send input config', ({ config }) => initTableInput(JSON.parse(config)));
+  socket.on('send inputs config', ({ config }) => initTableInput(JSON.parse(config)));
 
   const cornerToVec = (c) => ({ x: c[0], y: c[1] });
   const mapCornersToUV = (corners) => {
@@ -123,7 +123,6 @@ function relPos2Marker(i, j) {
   if (markerData[i].present && markerData[j].present) {
     if (checkPerspective(markerData[i], markerData[j], 0.01, 0.0002)) {
       const relPos = relativePosition(markerData[i], markerData[j], 19);
-      console.log(relPos);
     }
   }
 }
@@ -156,7 +155,7 @@ function checkPerspective(anchor, actor, edgeThres, perimeterThres) {
   const edgediff2 = edgevar2 / Math.pow(peri2/4, 2);
   
   const check = peridiff < perimeterThres && edgediff1 < edgeThres && edgediff2 < edgeThres ? true : false;
-  console.log(check, peridiff, edgediff1, edgediff2);
+  // console.log(check, peridiff, edgediff1, edgediff2);
   return check;
 }
 

@@ -79,6 +79,7 @@ const dummyInputData = [inputGroup0, inputGroup1, inputGroup2, inputGroup3];
 let inputGroupData = [];
 
 function initTableInput(inputArr) {
+    console.log(inputArr);
     inputGroupData = inputArr.map((i) => (new TableInputGroup(markerData, i)));
     inputGroupData.forEach((i) => i.calBoundingBox(30));
 }

@@ -79,7 +79,7 @@ function update() {
         if (checkPerspective(anchor, actor, 0.01, 0.0002)) {
           const endPos = relativePosition(anchor, actor, 19);
           tools.toolMode = 'NONE';
-          inputGroups[group].inputs[input].endePosition = endPos;
+          inputGroups[group].inputs[input].endPosition = endPos;
           setState(state);
         }
       }
