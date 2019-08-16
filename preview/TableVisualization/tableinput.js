@@ -130,7 +130,7 @@ class TableInputGroup {
 
     calBoundingBox(markerOffsetSize) {
         
-        let centerPts = this.inputs.map((i) => vecRot(vecScale(xaxis, i.relativePosition.distance), -i.relativePosition.angle));
+        let centerPts = this.inputs.map((i) => vecRot(vecScale(yaxis, i.relativePosition.distance), i.relativePosition.angle));
         centerPts.push({x:0, y:0});
 
         // centerPts.forEach(p => {
@@ -324,11 +324,11 @@ class Slider {
 
     update(parent) {
         if (this.actor.present) {
-            const as = vecRot(vecScale(xaxis, this.start.distance), this.start.angle + parent.angle);
+            const as = vecRot(vecScale(yaxis, this.start.distance), this.start.angle + parent.angle);
             const aa = vecSub(parent.anchor.center, this.actor.center);
             // debugVec(
-            //     mapToScreen(anchor.center),
-            //     mapToScreen(vecAdd(anchor.center, as)),
+            //     mapToScreen(parent.anchor.center),
+            //     mapToScreen(vecAdd(parent.anchor.center, as)),
             //     'red'
             //     );
             const len = vecMag(vecSub(as, aa));

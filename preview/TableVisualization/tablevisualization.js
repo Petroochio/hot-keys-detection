@@ -111,7 +111,7 @@ function updateVis() {
 
   // relPos2Marker(0, 1);
 
-  // inputGroupData.forEach((i) => i.calBoundingBox(30));
+  inputGroupData.forEach((i) => i.calBoundingBox(30));
 
   inputGroupData.forEach(i => i.update());
   inputGroupData.forEach(i => i.display());
