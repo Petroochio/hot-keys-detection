@@ -6,15 +6,15 @@ export function createToggleState(inputID) {
     type: 'TOGGLE',
     actorID: '', // unset
     detectWindow: 250,
-    relativePosition: '', // unset
+    relativePosition: { distance: 0, angle: 0 }, // unset
   }
 }
 
 export function Toggle(inputID, groupID, inputState, toolState, setInputState, setToolState) {
   const { actorID } = inputState;
 
-  const selectType = ({ value }) => {
-    inputState.type = value;
+  const selectType = ({ target }) => {
+    inputState.type = target.value;
     setInputState(inputID, inputState);
   };
   const typeSelect = h('span.param-value',
@@ -30,8 +30,8 @@ export function Toggle(inputID, groupID, inputState, toolState, setInputState, s
   ));
 
   // Input type and name
-  const setName = ({ value }) => {
-    inputState.name = value;
+  const setName = ({ target }) => {
+    inputState.name = target.value;
     setInputState(inputID, inputState);
   };
   const nameField = h('span.param-value.input-name',
@@ -87,11 +87,13 @@ export function Toggle(inputID, groupID, inputState, toolState, setInputState, s
     toolState.targetData = { group: groupID, input: inputID };
     setToolState(toolState);
   };
+  const relPos = inputState.relativePosition;
   const relativePosition = h(
     'li.parameter.input-group.param-actor-rp',
+    { on: { click: setRelPos } },
     [
       h('span.param-type', 'relative position'),
-      h('span.param-value', { on: { click: setRelPos } }, inputState.relativePosition),
+      h('span.param-value', `d: ${relPos.distance} a: ${relPos.angle}`),
     ]
   );
 

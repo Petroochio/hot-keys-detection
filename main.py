@@ -248,7 +248,7 @@ async def get_inputs_config(sid):
   if (os.path.isfile('configs/inputs.txt')):
     file = open('configs/intpus.txt', 'r') 
     config = file.read()
-  await sio.emit('send uv config', { 'config': config })
+  await sio.emit('send inputs config', { 'config': config })
 
 @sio.on('set inputs config')
 def set_uv_config(sid, data):

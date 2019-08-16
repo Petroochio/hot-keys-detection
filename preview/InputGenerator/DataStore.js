@@ -14,7 +14,6 @@ function propogate() {
 
 export function setState(newState) {
   state = newState;
-  console.log(state);
   propogate();
 }
 

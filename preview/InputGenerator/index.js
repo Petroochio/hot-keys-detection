@@ -1,7 +1,7 @@
 import UIManager from './UIElements/UIManager';
-import Editor from './Editor';
+import Editor, { getSocket } from './Editor';
 
 window.onload = () => {
-  UIManager();
   Editor();
+  UIManager(getSocket());
 }

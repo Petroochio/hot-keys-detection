@@ -40,7 +40,7 @@ export function relativePosition(anchor, actor, markerSize) {
   const peri1 = edgelen1.reduce((acc, v) => (acc + v));
   const peri2 = edgelen2.reduce((acc, v) => (acc + v));
 
-  const mmperpx = (markerSize*4) / ((peri1+peri2)/2);
+  const mmperpx = (markerSize*4) / ((peri1 + peri2)/2);
 
   const pxdist = vecMag(vecSub(anchor.center, actor.center));
   const realdist = pxdist * mmperpx;

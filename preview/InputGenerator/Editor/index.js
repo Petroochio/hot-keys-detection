@@ -54,20 +54,32 @@ function update() {
   ctx.clearRect(-10, -10, canvas.width + 10, canvas.height + 10);
   // Update
   markerData.forEach(m => m.checkPresence(timenow));
+  const { group, input } = tools.targetData;
+  let anchor, actor;
 
   switch (tools.toolMode) {
     case 'ACTOR_REL_POS':
-      const { group, input } = tools.targetData;
-      const anchor = markerData[inputGroups[group].anchorID];
-      const actor = markerData[inputGroups[group].inputs[input].actorID];
+      anchor = markerData[inputGroups[group].anchorID];
+      actor = markerData[inputGroups[group].inputs[input].actorID];
 
       if (anchor.present && actor.present) {
         if (checkPerspective(anchor, actor, 0.01, 0.0002)) {
-          console.log(anchor.center);
           const relPos = relativePosition(anchor, actor, 19);
-          console.log(relPos);
           tools.toolMode = 'NONE';
           inputGroups[group].inputs[input].relativePosition = relPos;
+          setState(state);
+        }
+      }
+      break;
+    case 'ACTOR_END_POS':
+      anchor = markerData[inputGroups[group].anchorID];
+      actor = markerData[inputGroups[group].inputs[input].actorID];
+
+      if (anchor.present && actor.present) {
+        if (checkPerspective(anchor, actor, 0.01, 0.0002)) {
+          const endPos = relativePosition(anchor, actor, 19);
+          tools.toolMode = 'NONE';
+          inputGroups[group].inputs[input].endePosition = endPos;
           setState(state);
         }
       }
@@ -80,6 +92,10 @@ function update() {
 
   // idk if there will be scope issues, but I'm avoiding them anyway
   window.requestAnimationFrame(update.bind(this));
+}
+
+export function getSocket() {
+  return socket;
 }
 
 export default function initEditor() {

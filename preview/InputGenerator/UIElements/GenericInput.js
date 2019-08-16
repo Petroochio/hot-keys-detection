@@ -50,8 +50,8 @@ export function GenericInput(inputID, groupID, inputState, toolState, setInputSt
       ]
   ));
 
-  const setName = ({ value }) => {
-    inputState.name = value;
+  const setName = ({ target }) => {
+    inputState.name = target.value;
     setInputState(inputID, inputState);
   };
   const nameField = h('span.param-value.input-name',

@@ -12,7 +12,10 @@ import { InputGroup, createGroupState } from './InputGroup';
 
 let root;
 let lastDom;
+let socket;
 
+
+// maybe put the socket in the state, idk
 function renderDom(state) {
   const { inputGroups, tools } = state;
   const setToolState = (newTools) => setState({ inputGroups, tools: newTools });
@@ -24,19 +27,25 @@ function renderDom(state) {
 
   const groups = inputGroups
     .map((g, i) => InputGroup(i, g, tools, setGroupState, setToolState));
+
   const addGroup = () => {
     inputGroups.push(createGroupState(inputGroups.length));
     setState({ inputGroups, tools });
   };
   const addGroupButton = h('button.add-group', { on: { click: addGroup } }, 'add input group');
-  const newDom = h('div.input-group-div', [...groups, addGroupButton]);
+
+  const save = () => socket.emit('set inputs config', { config: JSON.stringify(state.inputGroups) });
+  const saveButton = h('button.add-group', { on: { click: save } }, 'save input config');
+
+  const newDom = h('div.input-group-div', [...groups, addGroupButton, saveButton]);
   patch(lastDom, newDom);
   lastDom = newDom; // must do this bc snabbdom
 }
 
-export default function init() {
+export default function init(sock) {
   root = document.querySelector('#ui');
   lastDom = h('div.input-group-div', []);
   patch(root, lastDom);
   addStateListener(renderDom);
+  socket = sock;
 }
