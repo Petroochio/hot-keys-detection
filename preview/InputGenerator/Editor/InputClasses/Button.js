@@ -21,7 +21,7 @@ class Button {
       this.val = calEMA(v, this.val, 0.5);
   }
 
-  display(x, y, w, h) {
+  display(ctx, x, y, w, h) {
       ctx.beginPath();
       ctx.ellipse(x+w/2, y+h/2, w/2, h/2, 0, 0, Math.PI*2, false);
       ctx.stroke();

@@ -49,7 +49,7 @@ class Slider {
       }
   }
   
-  display(x, y, w, h) {
+  display(ctx, x, y, w, h) {
       ctx.beginPath();
       ctx.strokeRect(x, y, w, h);
       ctx.beginPath();

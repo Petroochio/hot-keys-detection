@@ -102,10 +102,10 @@ function update() {
   }
 
   // Display
-  if (!tools.renderInputPreview) markerData.forEach(m => m.display());
+  if (!tools.renderGroupPreview) markerData.forEach(m => m.display());
   else {
     // do input preview
-    inputGroupData.forEach(i => i.display());
+    inputGroupData.forEach(i => i.display(ctx));
   }
 
   // idk if there will be scope issues, but I'm avoiding them anyway

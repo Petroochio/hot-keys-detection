@@ -78,14 +78,16 @@ class InputGroup {
       this.inputs.forEach((i) => i.update(this));
   }
 
-  display() {
+  display(ctx) {
       if (this.anchor.present) {
-          const screenPos = mapToScreen(this.pos);
-          const bbPosX = unitToScreen(this.boundingBox.x);
-          const bbPosY = unitToScreen(this.boundingBox.y);
-          const bbw = unitToScreen(this.boundingBox.w);
-          const bbh = unitToScreen(this.boundingBox.h);
+          const screenPos = this.pos;//mapToScreen(this.pos);
+          const bbPosX = this.boundingBox.x; //unitToScreen(this.boundingBox.x);
+          const bbPosY = this.boundingBox.y; //unitToScreen(this.boundingBox.y);
+          const bbw = this.boundingBox.w; //unitToScreen(this.boundingBox.w);
+          const bbh = this.boundingBox.h; //unitToScreen(this.boundingBox.h);
           ctx.save();
+          ctx.fillStyle = '#ffffff';
+          ctx.strokeStyle = '#ffffff';
           ctx.textAlign = "left";
           ctx.textBaseline = "alphabetic";
           ctx.translate(screenPos.x, screenPos.y);
@@ -101,7 +103,7 @@ class InputGroup {
           const visGap = 7;
           this.inputs.forEach((i) => {
               const w = i.type==='SLIDER' ? slideVisW : visW;
-              i.display(visX, visY, w, visH);
+              i.display(ctx, visX, visY, w, visH);
               visX = visX + w + visGap;
           });
           ctx.restore();

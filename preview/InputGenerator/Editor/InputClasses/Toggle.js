@@ -21,7 +21,7 @@ class Toggle {
       this.val = calEMA(v, this.val, 0.5);
   }
 
-  display(x, y, w, h) {
+  display(ctx, x, y, w, h) {
       ctx.beginPath();
       ctx.strokeRect(x, y, w, h);
       const offset = 3;

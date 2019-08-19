@@ -1,4 +1,5 @@
-import { calEMA } from '../../Utils';
+import { Vec2, calEMA } from '../../Utils';
+const { vecSub, vecRot, vecScale, vecAngleBetween } = Vec2;
 
 const CORNER_ANGLE = -3*Math.PI/4;
 const xaxis = {x:1, y:0};
@@ -26,7 +27,7 @@ class Knob {
       }
   }
 
-  display(x, y, w, h) {
+  display(ctx, x, y, w, h) {
       const traj = vecScale(vecRot(xaxis, this.val), w/2);
       ctx.beginPath();
       ctx.ellipse(x+w/2, y+h/2, w/2, h/2, 0, 0, Math.PI*2, false);
