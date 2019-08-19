@@ -1,3 +1,7 @@
+export function calEMA(newVal, oldVal, EMA) {
+  return ((newVal * EMA) + (oldVal * (1 - EMA)));
+}
+
 // Vector Lib
 // Lol we made a vector library
 export const Vec2 = {

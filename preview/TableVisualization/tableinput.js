@@ -346,5 +346,4 @@ class Slider {
     }
 }
 
-
 const calEMA = (newVal, oldVal, EMA) => ((newVal * EMA) + (oldVal * (1 - EMA)));

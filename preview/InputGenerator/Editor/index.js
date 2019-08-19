@@ -2,11 +2,18 @@ import { initMarkers } from '../Markers';
 import { pointInRect, avgCorners } from '../Utils';
 import { setState, addStateListener } from '../DataStore';
 import { checkPerspective, relativePosition } from './RelativePos';
+import InputGroup from './InputGroup';
 
 let canvas, ctx, socket, frame;
 let frameW, frameH;
 let markerData;
 let state;
+
+let inputGroupData = [];
+function initInputGroup(inputArr) {
+  inputGroupData = inputArr.map((i) => (new InputGroup(markerData, i)));
+  inputGroupData.forEach((i) => i.calBoundingBox(30));
+}
 
 function resize() {
   frameW = window.innerWidth - 365;
@@ -16,6 +23,7 @@ function resize() {
 
 function stateListener(newState) {
   state = newState;
+  initInputGroup(state.inputGroups);
 
   // Set markers to be properly inuse
   markerData.forEach((m) => {
@@ -52,8 +60,14 @@ function update() {
   let timenow = Date.now();
 
   ctx.clearRect(-10, -10, canvas.width + 10, canvas.height + 10);
+  ctx.fillStyle = '#000000';
+  // fill black when no video
+  if (!tools.showVideo) ctx.fillRect(-10, -10, canvas.width + 10, canvas.height + 10);
   // Update
   markerData.forEach(m => m.checkPresence(timenow));
+  inputGroupData.forEach((i) => i.calBoundingBox(30));
+  inputGroupData.forEach(i => i.update());
+
   const { group, input } = tools.targetData;
   let anchor, actor;
 
@@ -88,7 +102,11 @@ function update() {
   }
 
   // Display
-  markerData.forEach(m => m.display());
+  if (!tools.renderInputPreview) markerData.forEach(m => m.display());
+  else {
+    // do input preview
+    inputGroupData.forEach(i => i.display());
+  }
 
   // idk if there will be scope issues, but I'm avoiding them anyway
   window.requestAnimationFrame(update.bind(this));
@@ -102,6 +120,12 @@ export default function initEditor() {
   canvas = document.querySelector('canvas');
   frame = document.querySelector('#frame');
   ctx = canvas.getContext('2d');
+  ctx.translate(0.5, 0.5);
+  ctx.fillStyle = 'rgba(255, 255, 255, 1.0)';
+  ctx.strokeStyle = 'rgba(255, 255, 255, 1.0)';
+  ctx.font = "13px sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
   markerData = initMarkers(ctx);
 
   canvas.addEventListener('mousemove', (e) => {
@@ -143,6 +167,9 @@ export default function initEditor() {
 
   socket = io.connect('localhost:5000');
   socket.on('update image', (data) => {
+    const { tools } = state;
+    if (!tools.showVideo) return; // bail when video no show
+
     frame.src = 'data:image/png;base64,' + data.image;
 
     if (frame.height !== canvas.height || frame.width !== canvas.width) {

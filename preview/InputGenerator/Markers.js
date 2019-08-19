@@ -67,14 +67,16 @@ class Marker {
             ctx.lineTo(Math.round(this.allCorners[3].x), Math.round(this.allCorners[3].y));
             ctx.lineTo(Math.round(this.allCorners[0].x), Math.round(this.allCorners[0].y));
 
+            ctx.fillStyle = '#ffffff';
             if (this.inuse) ctx.fillStyle = '#ff0000';
 
             if (this.shouldFill) ctx.fill();
 
             ctx.fillStyle = '#0000aa';
+            ctx.strokeStyle = '#ffffff';
             ctx.stroke();
             ctx.beginPath();
-            ctx.ellipse(Math.round(this.allCorners[0].x), Math.round(this.allCorners[0].y), 2.5, 2.5, 0, 0, Math.PI*2, false);
+            ctx.ellipse(Math.round(this.allCorners[0].x), Math.round(this.allCorners[0].y), 2, 2, 0, 0, Math.PI*2, false);
             ctx.fill();
 
             // const textPos = vecAdd(posCen, vecScale(vecCenCor0, size/2*1.5));

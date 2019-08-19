@@ -7,7 +7,7 @@ const patch = snabbdom.init([ // Init patch function with chosen modules
   require('snabbdom/modules/eventlisteners').default, // attaches event listeners
 ]);
 
-import { addStateListener, setState, setInputState } from '../DataStore';
+import { addStateListener, setToolState, setInputState } from '../DataStore';
 import { InputGroup, createGroupState } from './InputGroup';
 
 let root;
@@ -17,19 +17,18 @@ let socket;
 // maybe put the socket in the state, idk
 function renderDom(state) {
   const { inputGroups, tools } = state;
-  const setToolState = (newTools) => setState({ inputGroups, tools: newTools });
+  // const setToolState = (newTools) => setState({ inputGroups, tools: newTools });
 
   const setGroupState = (id, newGroup) => {
     inputGroups[id] = newGroup;
-    setState({ inputGroups, tools }); 
+    setInputState(inputGroups); 
   };
-
   const groups = inputGroups
     .map((g, i) => InputGroup(i, g, tools, setGroupState, setToolState));
 
   const addGroup = () => {
     inputGroups.push(createGroupState(inputGroups.length));
-    setState({ inputGroups, tools });
+    setInputState(inputGroups);
   };
   const addGroupButton = h('button.add-group', { on: { click: addGroup } }, 'add input group');
 
@@ -39,7 +38,19 @@ function renderDom(state) {
   const load = () => socket.emit('get inputs config');
   const loadButton = h('button.add-group', { on: { click: load } }, 'load input config');
 
-  const newDom = h('div.input-group-div', [...groups, addGroupButton, saveButton, loadButton]);
+  const toggleVideo = () => {
+    tools.showVideo = !tools.showVideo;
+    setToolState(tools);
+  };
+  const toggleVideoButton = h('button.add-group', { on: { click: toggleVideo } }, 'toggle video');
+
+  const toggleGroup = () => {
+    tools.renderGroupPreview = !tools.renderGroupPreview;
+    setToolState(tools);
+  };
+  const toggleGroupButton = h('button.add-group', { on: { click: toggleGroup } }, 'toggle group preview');
+
+  const newDom = h('div.input-group-div', [...groups, addGroupButton, saveButton, loadButton, toggleVideoButton, toggleGroupButton]);
   patch(lastDom, newDom);
   lastDom = newDom; // must do this bc snabbdom
 }

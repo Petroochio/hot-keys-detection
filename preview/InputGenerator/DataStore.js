@@ -3,6 +3,8 @@ let state = {
   tools: {
     toolMode: 'NONE',
     targetData: false,
+    showVideo: true,
+    renderGroupPreview: false,
   },
   inputGroups: [],
 };
@@ -19,6 +21,11 @@ export function setState(newState) {
 
 export function setInputState(newState) {
   state.inputGroups = newState;
+  propogate();
+}
+
+export function setToolState(newState) {
+  state.tools = newState;
   propogate();
 }
 
