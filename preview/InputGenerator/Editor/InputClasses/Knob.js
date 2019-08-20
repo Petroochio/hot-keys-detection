@@ -20,22 +20,30 @@ class Knob {
 
   update(parent) {
       if (this.actor.present) {
-          const anchorVec = vecSub(parent.anchor.center, parent.anchor.corner);
-          const actorVec = vecSub(this.actor.center, this.actor.corner);
-          const angleBetween = -vecAngleBetween(anchorVec, actorVec);
-          this.val = calEMA(angleBetween, this.val, 0.5);
+        //   const anchorVec = vecSub(parent.anchor.center, parent.anchor.corner);
+        //   const actorVec = vecSub(this.actor.center, this.actor.corner);
+        //   const angleBetween = -vecAngleBetween(anchorVec, actorVec);
+        //   this.val = calEMA(angleBetween, this.val, 0.5);
+        const anchorVec = vecSub(parent.quad2Rect(parent.anchor.center), parent.quad2Rect(parent.anchor.corner));
+        const actorVec = vecSub(parent.quad2Rect(this.actor.center), parent.quad2Rect(this.actor.corner));
+        const angleBetween = -vecAngleBetween(anchorVec, actorVec);
+        this.val = calEMA(angleBetween, this.val, 0.5);
       }
   }
 
-  display(ctx, x, y, w, h) {
-      const traj = vecScale(vecRot(xaxis, this.val), w/2);
-      ctx.beginPath();
-      ctx.ellipse(x+w/2, y+h/2, w/2, h/2, 0, 0, Math.PI*2, false);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(x+w/2, y+h/2);
-      ctx.lineTo(x+w/2+traj.x, y+h/2+traj.y);
-      ctx.stroke();
+  display(parent, ctx, x, y, w, h) {
+    const traj = vecScale(vecRot(xaxis, this.val), 20);
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(traj.x, traj.y);
+    ctx.stroke();
+    //   ctx.beginPath();
+    //   ctx.ellipse(x+w/2, y+h/2, w/2, h/2, 0, 0, Math.PI*2, false);
+    //   ctx.stroke();
+    //   ctx.beginPath();
+    //   ctx.moveTo(x+w/2, y+h/2);
+    //   ctx.lineTo(x+w/2+traj.x, y+h/2+traj.y);
+    //   ctx.stroke();
   }
 }
 

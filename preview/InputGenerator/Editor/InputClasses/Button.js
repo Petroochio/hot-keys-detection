@@ -21,13 +21,13 @@ class Button {
       this.val = calEMA(v, this.val, 0.5);
   }
 
-  display(ctx, x, y, w, h) {
-      ctx.beginPath();
-      ctx.ellipse(x+w/2, y+h/2, w/2, h/2, 0, 0, Math.PI*2, false);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.ellipse(x+w/2, y+h/2, w/2*this.val, h/2*this.val, 0, 0, Math.PI*2, false);
-      ctx.fill();
+  display(parent, ctx, x, y, w, h) {
+    //   ctx.beginPath();
+    //   ctx.ellipse(x+w/2, y+h/2, w/2, h/2, 0, 0, Math.PI*2, false);
+    //   ctx.stroke();
+    //   ctx.beginPath();
+    //   ctx.ellipse(x+w/2, y+h/2, w/2*this.val, h/2*this.val, 0, 0, Math.PI*2, false);
+    //   ctx.fill();
   }
 }
 

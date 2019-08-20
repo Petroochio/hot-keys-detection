@@ -65,7 +65,6 @@ function update() {
   if (!tools.showVideo) ctx.fillRect(-10, -10, canvas.width + 10, canvas.height + 10);
   // Update
   markerData.forEach(m => m.checkPresence(timenow));
-  inputGroupData.forEach((i) => i.calBoundingBox(30));
   inputGroupData.forEach(i => i.update());
 
   const { group, input } = tools.targetData;

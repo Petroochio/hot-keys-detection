@@ -21,14 +21,14 @@ class Toggle {
       this.val = calEMA(v, this.val, 0.5);
   }
 
-  display(ctx, x, y, w, h) {
-      ctx.beginPath();
-      ctx.strokeRect(x, y, w, h);
-      const offset = 3;
-      if (this.val > 0.5) {
-          ctx.beginPath();
-          ctx.fillRect(x + offset, y + offset, w - offset*2, h - offset*2);
-      }
+  display(parent, ctx, x, y, w, h) {
+    //   ctx.beginPath();
+    //   ctx.strokeRect(x, y, w, h);
+    //   const offset = 3;
+    //   if (this.val > 0.5) {
+    //       ctx.beginPath();
+    //       ctx.fillRect(x + offset, y + offset, w - offset*2, h - offset*2);
+    //   }
   }
 }
 
