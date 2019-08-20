@@ -158,12 +158,12 @@ class InputGroup {
       this.angle = vecAngleBetween(vecSub(this.anchor.center, this.anchor.corner), angleRefAxis) - CORNER_ANGLE;
       this.pos = this.anchor.center;
       if (this.anchor.present) {
-      this.calDistortionMatrices(
-        this.anchor.allCorners[0], this.anchor.allCorners[1], this.anchor.allCorners[2], this.anchor.allCorners[3],
-        MARKER_CORNERS[0], MARKER_CORNERS[1], MARKER_CORNERS[2], MARKER_CORNERS[3]
+        this.calDistortionMatrices(
+            this.anchor.allCorners[0], this.anchor.allCorners[1], this.anchor.allCorners[2], this.anchor.allCorners[3],
+            MARKER_CORNERS[0], MARKER_CORNERS[1], MARKER_CORNERS[2], MARKER_CORNERS[3]
         );
+        this.inputs.forEach((i) => i.update(this));
       }
-      this.inputs.forEach((i) => i.update(this));
   }
 
   display(ctx) {

@@ -1,5 +1,5 @@
 import { Vec2, calEMA } from '../../Utils';
-const { vecSub, vecMag, vecRot, vecScale, vecEMA } = Vec2;
+const { vecSub, vecMag, vecRot, vecScale, vecEMA, lineCP } = Vec2;
 
 const CORNER_ANGLE = -3*Math.PI/4;
 const xaxis = {x:1, y:0};
@@ -57,6 +57,11 @@ class Slider {
           this.spos = vecEMA(this.spos, as, 1.0);
           const ae = vecRot(vecScale(xaxis, this.end.distance), -this.end.angle);
           this.epos = vecEMA(this.spos, ae, 1.0);
+          
+          let v = lineCP(this.epos, this.pos, this.spos).t;
+          v = v > 1 ? 1 : v < 0 ? 0 : v; // constraining v between 0 to 1
+          this.val = calEMA(v, this.val, 0.5); 
+          console.log(v, this.val);
       }
   }
   
