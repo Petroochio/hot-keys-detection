@@ -58,8 +58,10 @@ function renderDom(state) {
       'toggle group preview',
       h('input',  { props: { type: 'checkbox', checked: tools.renderGroupPreview }, on: { change: toggleGroup } })
     ]);
+  
+  const actionBar = h('div#action-bar', [addGroupButton, saveButton, loadButton, toggleVideoButton, toggleGroupButton]);
 
-  const newDom = h('div.input-group-div', [addGroupButton, saveButton, loadButton, toggleVideoButton, toggleGroupButton, ...groups]);
+  const newDom = h('div.input-group-div', [actionBar, ...groups]);
   patch(lastDom, newDom);
   lastDom = newDom; // must do this bc snabbdom
 }
