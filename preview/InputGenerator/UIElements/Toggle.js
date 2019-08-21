@@ -93,7 +93,7 @@ export function Toggle(inputID, groupID, inputState, toolState, setInputState, s
     { on: { click: setRelPos } },
     [
       h('span.param-type', 'relative position'),
-      h('span.param-value', `d: ${relPos.distance} a: ${relPos.angle}`),
+      h('span.param-value', `d: ${relPos.distance.toFixed(2)} a: ${relPos.angle.toFixed(2)}`),
     ]
   );
 

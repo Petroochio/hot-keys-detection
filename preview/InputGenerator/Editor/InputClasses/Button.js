@@ -37,8 +37,9 @@ class Button {
     ctx.ellipse(0, 0, w/2, w/2, 0, 0, Math.PI*2, false);
     ctx.stroke();
     
+    ctx.fillStyle = 'white';
     ctx.beginPath();
-    ctx.ellipse(0, 0, w*this.val, w*this.val, 0, 0, Math.PI*2, false);
+    ctx.ellipse(0, 0, w*this.val/2, w*this.val/2, 0, 0, Math.PI*2, false);
     ctx.fill();
     
     ctx.restore();

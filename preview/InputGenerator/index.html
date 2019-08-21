@@ -12,6 +12,7 @@
       body, html {
           font-family: sans-serif;
           font-size: 12px;
+          overflow-x: hidden;
       }
 
       ul {
@@ -79,12 +80,33 @@
       .input-group-div {
           position: relative;
           float: left;
-          margin: 1em;
+          margin: 0 1em 1em 1em;
+          height: 100vh;
+          overflow-y: scroll;
       }
 
       .param-type {
           display: inline-block;
           width: 13em;
+      }
+
+      #action-bar {
+        position: relative;
+        float: left;
+        width: 100%;
+        margin-bottom: 2em;
+      }
+
+      #action-bar .add-group {
+        position: relative;
+        float: left;
+        width: 20em;
+        margin-top: 0.5em;
+        clear: both;
+      }
+
+      input[type="checkbox"] {
+        margin-top: 0.2em;
       }
 
       /* Input group name */
