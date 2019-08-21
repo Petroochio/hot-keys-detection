@@ -1,5 +1,4 @@
-import { Vec2 } from '../Utils';
-const { vecMag, vecSub, vecAngleBetween } = Vec2;
+import { vecMag, vecSub, vecAngleBetween } from '../Utils/Vec2';
 
 export function checkPerspective(anchor, actor, edgeThres, perimeterThres) {
   // array of edge lengths

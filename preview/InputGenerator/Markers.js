@@ -1,4 +1,4 @@
-import { Vec2 } from './Utils';
+import * as Vec2 from './Utils/Vec2';
 
 const MARKER_COUNT = 100;
 const MARKER_TIMEOUT = 300;

@@ -1,4 +1,4 @@
-import { calEMA } from '../../Utils';
+import { calEMA } from '../../Utils/General';
 
 const CORNER_ANGLE = -3*Math.PI/4;
 

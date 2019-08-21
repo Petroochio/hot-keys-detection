@@ -1,5 +1,6 @@
 import { initMarkers } from '../Markers';
-import { pointInRect, avgCorners } from '../Utils';
+import { pointInRect } from '../Utils/CollisionDetection';
+import { avgCorners } from '../Utils/General';
 import { setState, addStateListener } from '../DataStore';
 import { checkPerspective, relativePosition } from './RelativePos';
 import InputGroup from './InputGroup';
