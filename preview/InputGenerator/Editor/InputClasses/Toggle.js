@@ -1,6 +1,9 @@
 import { calEMA } from '../../Utils/General';
+import { vecSub, vecMag, vecRot, vecScale, vecEMA, lineCP, vecUnit } from '../../Utils/Vec2';
 
 const CORNER_ANGLE = -3*Math.PI/4;
+const xaxis = {x:1, y:0};
+const yaxis = {x:0, y:1};
 
 class Toggle {
   constructor(markerData, inputData) {
@@ -21,14 +24,23 @@ class Toggle {
       this.val = calEMA(v, this.val, 0.5);
   }
 
-  display(parent, ctx, x, y, w, h) {
-    //   ctx.beginPath();
-    //   ctx.strokeRect(x, y, w, h);
-    //   const offset = 3;
-    //   if (this.val > 0.5) {
-    //       ctx.beginPath();
-    //       ctx.fillRect(x + offset, y + offset, w - offset*2, h - offset*2);
-    //   }
+  display(parent, ctx, pxpermm, w) {
+    const screenpos = vecRot(vecScale(xaxis, this.relativePosition.distance*pxpermm), -this.relativePosition.angle);
+
+    ctx.save();
+
+    ctx.translate(parent.pos.x, parent.pos.y);
+    ctx.rotate(parent.angle);
+    ctx.translate(screenpos.x, screenpos.y);
+
+    ctx.strokeRect(-w/2, -w/2, w, w);
+    
+    if (this.val > 0.5) {
+      ctx.fillStyle = 'rgba(255, 255, 255, 1.0)';
+      ctx.fillRect(-w/2+3, -w/2+3, w-6, w-6);
+    }
+    
+    ctx.restore();
   }
 }
 

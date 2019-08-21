@@ -1,5 +1,5 @@
 import { calEMA } from '../../Utils/General';
-import { vecSub, vecMag, vecRot, vecScale, vecEMA, lineCP } from '../../Utils/Vec2';
+import { vecSub, vecMag, vecRot, vecScale, vecEMA, lineCP, vecUnit } from '../../Utils/Vec2';
 import { matrixTransform } from '../../Utils/Distortion';
 
 const CORNER_ANGLE = -3*Math.PI/4;
@@ -35,6 +35,7 @@ class Slider {
       this.pos = {x:0, y:0};
       this.spos = {x:0, y:0};
       this.epos = {x:0, y:0};
+      this.track = {x:0, y:0};
   }
 
   update(parent) {
@@ -45,6 +46,7 @@ class Slider {
         this.spos = vecEMA(this.spos, as, 1.0);
         const ae = vecRot(vecScale(xaxis, this.end.distance), -this.end.angle);
         this.epos = vecEMA(this.spos, ae, 1.0);
+        this.track = vecSub(this.spos, this.epos);
         
         let v = lineCP(this.epos, this.pos, this.spos).t;
         v = v > 1 ? 1 : v < 0 ? 0 : v; // constraining v between 0 to 1
@@ -52,21 +54,34 @@ class Slider {
     }
   }
   
-  display(parent, ctx, x, y, w, h) {
+  display(parent, ctx, pxpermm, w) {
+    const screenpos = vecRot(vecScale(xaxis, this.relativePosition.distance*pxpermm), -this.relativePosition.angle);
+
+    ctx.save();
+
+    ctx.translate(parent.pos.x, parent.pos.y);
+    ctx.rotate(parent.angle);
+    ctx.translate(screenpos.x, screenpos.y);
+
+    const dir = vecUnit(this.track);
+    const te = vecScale(dir, w*3);
+    const se = vecScale(dir, this.val * w*3);
+
+    ctx.lineWidth = w;
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
     ctx.beginPath();
     ctx.moveTo(0, 0);
-    ctx.lineTo(this.pos.x, this.pos.y);
+    ctx.lineTo(te.x, te.y);
     ctx.stroke();
 
+    ctx.strokeStyle = 'rgba(255, 255, 255, 1.0)';
     ctx.beginPath();
     ctx.moveTo(0, 0);
-    ctx.lineTo(this.spos.x, this.spos.y);
+    ctx.lineTo(se.x, se.y);
     ctx.stroke();
 
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(this.epos.x, this.epos.y);
-    ctx.stroke();
+    ctx.restore();
   }
 }
 

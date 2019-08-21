@@ -8,7 +8,7 @@ import * as Vec2 from '../Utils/Vec2';
 import { calDistortionMatrices, matrixTransform } from '../Utils/Distortion';
 const config = {};
 
-const { vecSub, vecRot, vecScale, vecAngleBetween } = Vec2;
+const { vecSub, vecRot, vecScale, vecAngleBetween, vecEMA, vecMag } = Vec2;
 
 // These need to be made constants
 const CORNER_ANGLE = -3*Math.PI/4;
@@ -60,9 +60,11 @@ class InputGroup {
     this.matrixQuad2Rect;
   }
 
-  calBoundingBox(markerOffsetSize) {
-    let centerPts = this.inputs.map((i) => vecRot(vecScale(yaxis, i.relativePosition.distance), i.relativePosition.angle));
+  calBoundingBox(markerOffsetSize, pxpermm) {
+    let centerPts = this.inputs.map(i => (vecRot(vecScale(xaxis, i.relativePosition.distance*pxpermm), -i.relativePosition.angle)));
     centerPts.push({x:0, y:0});
+
+    // centerPts = centerPts.map(p => vecRot(p, -this.angle));
 
     centerPts.sort((a, b) => (a.x - b.x));
     const xmax = centerPts[centerPts.length-1].x;
@@ -82,7 +84,7 @@ class InputGroup {
 
   update() {
     this.angle = vecAngleBetween(vecSub(this.anchor.center, this.anchor.corner), angleRefAxis) - CORNER_ANGLE;
-    this.pos = this.anchor.center;
+    this.pos = vecEMA(this.anchor.center, this.pos, 0.5);
     if (this.anchor.present) {
       this.matrixRect2Quad = calDistortionMatrices(
         this.anchor.allCorners[0], this.anchor.allCorners[1], this.anchor.allCorners[2], this.anchor.allCorners[3],
@@ -94,32 +96,43 @@ class InputGroup {
     }
   }
 
-  display(ctx) {
+  display(ctx, markerSize) {
     if (this.anchor.present) {
+
+      const edgelen = this.anchor.allCorners.map((v, i, arr) => vecMag(vecSub(v, arr[(i + 1) % arr.length])));
+      const peri = edgelen.reduce((acc, v) => (acc + v));
+      const pxpermm = peri / (markerSize*4);
+      this.calBoundingBox(50, pxpermm);
 
       calDistortionMatrices(
         this.anchor.allCorners[0], this.anchor.allCorners[1], this.anchor.allCorners[2], this.anchor.allCorners[3],
         MARKER_CORNERS[0], MARKER_CORNERS[1], MARKER_CORNERS[2], MARKER_CORNERS[3]
       );
 
+      ctx.strokeStyle = 'rgba(255, 255, 255, 1.0)';
+
       ctx.save();
       ctx.translate(this.pos.x, this.pos.y);
-      ctx.strokeStyle = "rgba(255, 100, 255, 1.0)";
-      ctx.lineWidth = 3;
+      ctx.rotate(this.angle);
 
-      const mp = this.anchor.allCorners.map(c => matrixTransform(this.matrixQuad2Rect, c));
-      ctx.beginPath();
-      ctx.moveTo(mp[mp.length-1].x, mp[mp.length-1].y);
-      mp.forEach(c => {
-        ctx.lineTo(c.x, c.y);
-      });
-      ctx.stroke();
+      ctx.strokeRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.w, this.boundingBox.h);
+      ctx.fillStyle = "rgba(100, 100, 100, 0.7)";
+      ctx.fillRect(this.boundingBox.x, this.boundingBox.y, this.boundingBox.w, this.boundingBox.h);
 
-      this.inputs.forEach((i) => {
-        i.display(this, ctx, 0, 0, 0, 0);
-      });
+      ctx.fillStyle = 'white';
+      ctx.font = '12px sans-serif';
+      ctx.textBaseline = 'top';
+      ctx.fillText(' '+this.name, this.boundingBox.x, this.boundingBox.y);
+      
+      ctx.font = '20px sans-serif';
+      ctx.textBaseline = 'center';
+      ctx.textAlign = 'center';
+      ctx.fillText('\u2693', 0, 0);
 
       ctx.restore();
+      this.inputs.forEach((i) => {
+        i.display(this, ctx, pxpermm, 20*pxpermm);
+      });
     }
   }
 

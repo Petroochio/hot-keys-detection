@@ -1,6 +1,9 @@
 import { calEMA } from '../../Utils/General';
+import { vecSub, vecMag, vecRot, vecScale, vecEMA, lineCP, vecUnit } from '../../Utils/Vec2';
 
 const CORNER_ANGLE = -3*Math.PI/4;
+const xaxis = {x:1, y:0};
+const yaxis = {x:0, y:1};
 
 class Button {
   constructor(markerData, inputData) {
@@ -21,13 +24,24 @@ class Button {
       this.val = calEMA(v, this.val, 0.5);
   }
 
-  display(parent, ctx, x, y, w, h) {
-    //   ctx.beginPath();
-    //   ctx.ellipse(x+w/2, y+h/2, w/2, h/2, 0, 0, Math.PI*2, false);
-    //   ctx.stroke();
-    //   ctx.beginPath();
-    //   ctx.ellipse(x+w/2, y+h/2, w/2*this.val, h/2*this.val, 0, 0, Math.PI*2, false);
-    //   ctx.fill();
+  display(parent, ctx, pxpermm, w) {
+    const screenpos = vecRot(vecScale(xaxis, this.relativePosition.distance*pxpermm), -this.relativePosition.angle);
+
+    ctx.save();
+
+    ctx.translate(parent.pos.x, parent.pos.y);
+    ctx.rotate(parent.angle);
+    ctx.translate(screenpos.x, screenpos.y);
+
+    ctx.beginPath();
+    ctx.ellipse(0, 0, w/2, w/2, 0, 0, Math.PI*2, false);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.ellipse(0, 0, w*this.val, w*this.val, 0, 0, Math.PI*2, false);
+    ctx.fill();
+    
+    ctx.restore();
   }
 }
 

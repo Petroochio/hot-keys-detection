@@ -33,19 +33,27 @@ class Knob {
       }
   }
 
-  display(parent, ctx, x, y, w, h) {
-    const traj = vecScale(vecRot(xaxis, this.val), 20);
+  display(parent, ctx, pxpermm, w) {
+    const traj = vecScale(vecRot(xaxis, this.val), w/2);
+    const screenpos = vecRot(vecScale(xaxis, this.relativePosition.distance*pxpermm), -this.relativePosition.angle);
+
+    ctx.save();
+
+    ctx.translate(parent.pos.x, parent.pos.y);
+    ctx.rotate(parent.angle);
+    ctx.translate(screenpos.x, screenpos.y);
+
+    ctx.beginPath();
+    ctx.ellipse(0, 0, w/2, w/2, 0, 0, Math.PI*2, false);
+    ctx.stroke();
+
     ctx.beginPath();
     ctx.moveTo(0, 0);
     ctx.lineTo(traj.x, traj.y);
     ctx.stroke();
-    //   ctx.beginPath();
-    //   ctx.ellipse(x+w/2, y+h/2, w/2, h/2, 0, 0, Math.PI*2, false);
-    //   ctx.stroke();
-    //   ctx.beginPath();
-    //   ctx.moveTo(x+w/2, y+h/2);
-    //   ctx.lineTo(x+w/2+traj.x, y+h/2+traj.y);
-    //   ctx.stroke();
+    
+    ctx.restore();
+    
   }
 }
 
