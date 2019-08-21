@@ -55,13 +55,3 @@ export function matrixTransform(m, v) {
     y: subset(result, index(1, 0)) / subset(result, index(2, 0))
   };
 }
-
-// map point from quad to rect - need to calDistortionMatrix first
-export function quad2Rect(matrix, v) {
-  return this.matrixTransform(this.matrixQuad2Rect, v);
-}
-
-// map point from quad to rect - need to calDistortionMatrix first
-export function rect2Quad(v) {
-  return this.matrixTransform(this.matrixQuad2Rect, v);
-}

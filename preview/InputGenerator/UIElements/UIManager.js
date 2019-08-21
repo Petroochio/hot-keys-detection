@@ -42,15 +42,24 @@ function renderDom(state) {
     tools.showVideo = !tools.showVideo;
     setToolState(tools);
   };
-  const toggleVideoButton = h('button.add-group', { on: { click: toggleVideo } }, 'toggle video');
+  const toggleVideoButton = h('span.add-group',
+    [
+      'toggle video',
+      h('input',  { props: { type: 'checkbox', checked: tools.showVideo }, on: { change: toggleVideo } })
+    ]);
 
-  const toggleGroup = () => {
+  const toggleGroup = (e) => {
     tools.renderGroupPreview = !tools.renderGroupPreview;
     setToolState(tools);
   };
-  const toggleGroupButton = h('button.add-group', { on: { click: toggleGroup } }, 'toggle group preview');
+  // <input type="checkbox" name="vehicle" value="Bike">
+  const toggleGroupButton = h('span.add-group',
+    [
+      'toggle group preview',
+      h('input',  { props: { type: 'checkbox', checked: tools.renderGroupPreview }, on: { change: toggleGroup } })
+    ]);
 
-  const newDom = h('div.input-group-div', [...groups, addGroupButton, saveButton, loadButton, toggleVideoButton, toggleGroupButton]);
+  const newDom = h('div.input-group-div', [addGroupButton, saveButton, loadButton, toggleVideoButton, toggleGroupButton, ...groups]);
   patch(lastDom, newDom);
   lastDom = newDom; // must do this bc snabbdom
 }
