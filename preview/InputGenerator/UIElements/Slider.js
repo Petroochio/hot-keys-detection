@@ -1,4 +1,5 @@
 import h from 'snabbdom/h';
+import ToolStore from '../DataStore/Tools';
 
 export function createSliderState(inputID) {
   return {
@@ -11,7 +12,7 @@ export function createSliderState(inputID) {
   }
 }
 
-export function Slider(inputID, groupID, inputState, toolState, setInputState, setToolState) {
+export function Slider(inputID, groupID, inputState, toolState, setInputState) {
   const { actorID } = inputState;
 
   const selectType = ({ target }) => {
@@ -42,9 +43,8 @@ export function Slider(inputID, groupID, inputState, toolState, setInputState, s
 
   // Actor
   const selectActor = (e) => {
-    toolState.toolMode = 'ACTOR_SELECT';
-    toolState.targetData = { group: groupID, input: inputID };
-    setToolState(toolState);
+    ToolStore.setProp('toolMode', 'ACTOR_SELECT');
+    ToolStore.setProp('targetData', { group: groupID, input: inputID });
   };
   const actor = h(
     'li.parameter.input-group.param-actor',
@@ -84,9 +84,8 @@ export function Slider(inputID, groupID, inputState, toolState, setInputState, s
 
   // Relative Position
   const setRelPos = (e) => {
-    toolState.toolMode = 'ACTOR_REL_POS';
-    toolState.targetData = { group: groupID, input: inputID };
-    setToolState(toolState);
+    ToolStore.setProp('toolMode', 'ACTOR_REL_POS');
+    ToolStore.setProp('targetData', { group: groupID, input: inputID });
   };
   const relPos = inputState.relativePosition;
   const relativePosition = h(
@@ -100,9 +99,8 @@ export function Slider(inputID, groupID, inputState, toolState, setInputState, s
 
   // Relative Position
   const setEndPos = (e) => {
-    toolState.toolMode = 'ACTOR_END_POS';
-    toolState.targetData = { group: groupID, input: inputID };
-    setToolState(toolState);
+    ToolStore.setProp('toolMode', 'ACTOR_END_POS');
+    ToolStore.setProp('targetData', { group: groupID, input: inputID });
   };
   const endPos = inputState.endPosition;
   const endPosition = h(

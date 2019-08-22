@@ -12,7 +12,7 @@ export function createGenericState(inputID) {
   }
 }
 
-export function GenericInput(inputID, groupID, inputState, toolState, setInputState, setToolState) {
+export function GenericInput(inputID, groupID, inputState, toolState, setInputState) {
   const selectType = ({ target }) => {
     let newState;
     switch (target.value) {

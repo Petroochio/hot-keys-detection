@@ -4,6 +4,7 @@ import { Button } from './Button';
 import { Toggle } from './Toggle';
 import { Knob } from './Knob';
 import { Slider } from './Slider';
+import ToolStore from '../DataStore/Tools';
 
 export function createGroupState(groupID) {
   return {
@@ -15,7 +16,7 @@ export function createGroupState(groupID) {
 }
 
 // State should be the individual group state
-export function InputGroup(groupID, groupState, toolState, setGroupState, setToolState) {
+export function InputGroup(groupID, groupState, toolState, setGroupState) {
   // Name
   const setName = (e) => {
     groupState.name = e.target.value;
@@ -38,9 +39,8 @@ export function InputGroup(groupID, groupState, toolState, setGroupState, setToo
 
   // Anchor
   const selectAnchor = (e) => {
-    toolState.toolMode = 'ANCHOR_SELECT';
-    toolState.targetData = groupID;
-    setToolState(toolState);
+    ToolStore.setProp('toolMode', 'ANCHOR_SELECT');
+    ToolStore.setProp('targetData', groupID);
   };
   const anchor = h(
     'li.parameter.input-group.param-anchor',
@@ -89,15 +89,15 @@ export function InputGroup(groupID, groupState, toolState, setGroupState, setToo
     .map((a, i) => {
       switch (a.type) {
         case 'BUTTON':
-          return Button(i, groupID, a, toolState, setInputState, setToolState);
+          return Button(i, groupID, a, toolState, setInputState);
         case 'TOGGLE':
-          return Toggle(i, groupID, a, toolState, setInputState, setToolState);
+          return Toggle(i, groupID, a, toolState, setInputState);
         case 'KNOB':
-          return Knob(i, groupID, a, toolState, setInputState, setToolState);
+          return Knob(i, groupID, a, toolState, setInputState);
         case 'SLIDER':
-          return Slider(i, groupID, a, toolState, setInputState, setToolState);
+          return Slider(i, groupID, a, toolState, setInputState);
         default:
-          return GenericInput(i, groupID, a, toolState, setInputState, setToolState);
+          return GenericInput(i, groupID, a, toolState, setInputState);
       }
     });
 

@@ -1,4 +1,5 @@
 import h from 'snabbdom/h';
+import ToolStore from '../DataStore/Tools';
 
 export function createToggleState(inputID) {
   return {
@@ -10,7 +11,7 @@ export function createToggleState(inputID) {
   }
 }
 
-export function Toggle(inputID, groupID, inputState, toolState, setInputState, setToolState) {
+export function Toggle(inputID, groupID, inputState, toolState, setInputState) {
   const { actorID } = inputState;
 
   const selectType = ({ target }) => {
@@ -41,9 +42,8 @@ export function Toggle(inputID, groupID, inputState, toolState, setInputState, s
 
   // Actor
   const selectActor = (e) => {
-    toolState.toolMode = 'ACTOR_SELECT';
-    toolState.targetData = { group: groupID, input: inputID };
-    setToolState(toolState);
+    ToolStore.setProp('toolMode', 'ACTOR_SELECT');
+    ToolStore.setProp('targetData', { group: groupID, input: inputID });
   };
   const actor = h(
     'li.parameter.input-group.param-actor',
@@ -83,9 +83,8 @@ export function Toggle(inputID, groupID, inputState, toolState, setInputState, s
 
   // Relative Position
   const setRelPos = (e) => {
-    toolState.toolMode = 'ACTOR_REL_POS';
-    toolState.targetData = { group: groupID, input: inputID };
-    setToolState(toolState);
+    ToolStore.setProp('toolMode', 'ACTOR_REL_POS');
+    ToolStore.setProp('targetData', { group: groupID, input: inputID });
   };
   const relPos = inputState.relativePosition;
   const relativePosition = h(

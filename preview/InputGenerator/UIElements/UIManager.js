@@ -7,56 +7,88 @@ const patch = snabbdom.init([ // Init patch function with chosen modules
   require('snabbdom/modules/eventlisteners').default, // attaches event listeners
 ]);
 
-import { addStateListener, setToolState, setInputState } from '../DataStore';
+import InputGroupStore from '../DataStore/InputGroups';
+import ToolStore from '../DataStore/Tools';
+import UIStore from '../DataStore/UI';
 import { InputGroup, createGroupState } from './InputGroup';
 
 let root;
 let lastDom;
 let socket;
+let inputGroupsState, toolState, uiState;
+
+let saveHeld = false;
+let saveCount = 0;
+const SAVE_COUNT_MAX = 3000;
+
+export function update(dt) {
+  if (saveHeld) {
+    saveCount += dt;
+    // UIStore.setProp('saveCount', uiState.saveCount + dt);
+    // console.log(saveCount);
+
+    renderDom();
+  }
+}
 
 // maybe put the socket in the state, idk
-function renderDom(state) {
-  const { inputGroups, tools } = state;
-  // const setToolState = (newTools) => setState({ inputGroups, tools: newTools });
-
-  const setGroupState = (id, newGroup) => {
-    inputGroups[id] = newGroup;
-    setInputState(inputGroups); 
-  };
-  const groups = inputGroups
-    .map((g, i) => InputGroup(i, g, tools, setGroupState, setToolState));
+function renderDom() {
+  const setGroupState = InputGroupStore.setProp;
+  const groups = inputGroupsState
+    .map((g, i) => InputGroup(i, g, toolState, setGroupState));
 
   const addGroup = () => {
-    inputGroups.push(createGroupState(inputGroups.length));
-    setInputState(inputGroups);
+    InputGroupStore.pushGroup(createGroupState(inputGroups.length));
   };
   const addGroupButton = h('button.add-group', { on: { click: addGroup } }, 'add input group');
 
-  const save = () => socket.emit('set inputs config', { config: JSON.stringify(state.inputGroups) });
-  const saveButton = h('button.add-group', { on: { click: save } }, 'save input config');
+  const saveStart = () => {
+    // UIStore.setProp('saveHeld', true);
+    saveHeld = true;
+  };
+  const saveEnd = () => {
+    if (saveCount >= SAVE_COUNT_MAX) {
+      // UIStore.setProp('saveHeld', false);
+      // UIStore.setProp('saveCount', 0);
+      console.log('did save');
+      socket.emit('set inputs config', { config: JSON.stringify(inputGroupsState) });
+    }
+    saveHeld = false;
+    saveCount = 0;
+    renderDom();
+  }
+  const noSave = () => {
+    saveHeld = false;
+    saveCount = 0;
+    renderDom(); // MAKE A STATE MANAGER FOR UI FOR THIS REASON
+  }
+
+  const fillWidth = saveCount >= SAVE_COUNT_MAX ? 100 : saveCount / SAVE_COUNT_MAX * 100;
+  const saveButton = h(
+    'button.add-group',
+    { on: { mouseup: saveEnd, mousedown: saveStart, mouseout: noSave } },
+    ['save input config', h('div.save-fill', { style: { width: `${fillWidth}%` } })]
+  );
 
   const load = () => socket.emit('get inputs config');
   const loadButton = h('button.add-group', { on: { click: load } }, 'load input config');
 
   const toggleVideo = () => {
-    tools.showVideo = !tools.showVideo;
-    setToolState(tools);
+    ToolStore.setProp('showVideo', !toolState.showVideo);
   };
   const toggleVideoButton = h('span.add-group',
     [
       'toggle video',
-      h('input',  { props: { type: 'checkbox', checked: tools.showVideo }, on: { change: toggleVideo } })
+      h('input',  { props: { type: 'checkbox', checked: toolState.showVideo }, on: { change: toggleVideo } })
     ]);
 
   const toggleGroup = (e) => {
-    tools.renderGroupPreview = !tools.renderGroupPreview;
-    setToolState(tools);
+    ToolStore.setProp('renderGroupPreview', !toolState.renderGroupPreview);
   };
-  // <input type="checkbox" name="vehicle" value="Bike">
   const toggleGroupButton = h('span.add-group',
     [
       'toggle group preview',
-      h('input',  { props: { type: 'checkbox', checked: tools.renderGroupPreview }, on: { change: toggleGroup } })
+      h('input',  { props: { type: 'checkbox', checked: toolState.renderGroupPreview }, on: { change: toggleGroup } })
     ]);
   
   const actionBar = h('div#action-bar', [addGroupButton, saveButton, loadButton, toggleVideoButton, toggleGroupButton]);
@@ -66,11 +98,17 @@ function renderDom(state) {
   lastDom = newDom; // must do this bc snabbdom
 }
 
-export default function init(sock) {
+export function init(sock) {
   root = document.querySelector('#ui');
   lastDom = h('div.input-group-div', []);
   patch(root, lastDom);
-  addStateListener(renderDom);
+  uiState = UIStore.getState();
+  toolState = ToolStore.getState();
+  inputGroupsState = InputGroupStore.getState();
+
+  ToolStore.subscribe(renderDom)
+  InputGroupStore.subscribe(renderDom);
+  UIStore.subscribe(renderDom);
   socket = sock;
-  socket.on('send inputs config', ({ config }) => setInputState(JSON.parse(config)));
+  socket.on('send inputs config', ({ config }) => InputGroupStore.loadConfig(JSON.parse(config)));
 }

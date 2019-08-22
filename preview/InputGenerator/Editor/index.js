@@ -1,36 +1,35 @@
 import { initMarkers } from '../Markers';
 import { pointInRect } from '../Utils/CollisionDetection';
 import { avgCorners } from '../Utils/General';
-import { setState, addStateListener } from '../DataStore';
+import InputGroupStore from '../DataStore/InputGroups';
+import ToolStore from '../DataStore/Tools';
 import { checkPerspective, relativePosition } from './RelativePos';
 import InputGroup from './InputGroup';
 
 let canvas, ctx, socket, frame;
 let frameW, frameH;
 let markerData;
-let state;
+let inputGroupState, toolState;
 
 let inputGroupData = [];
-function initInputGroup(inputArr) {
-  inputGroupData = inputArr.map((i) => (new InputGroup(markerData, i)));
+function initInputGroup() {
+  inputGroupData = inputGroupState.map((i) => (new InputGroup(markerData, i)));
   inputGroupData.forEach((i) => i.calBoundingBox(30));
 }
 
 function resize() {
   frameW = window.innerWidth - 365;
-  
   frame.width = frameW;
 }
 
-function stateListener(newState) {
-  state = newState;
-  initInputGroup(state.inputGroups);
+function stateListener() {
+  initInputGroup(inputGroupState);
 
   // Set markers to be properly inuse
   markerData.forEach((m) => {
     m.inuse = false;
 
-    state.inputGroups.forEach((group, gID) => {
+    inputGroupState.forEach((group, gID) => {
       const { anchorID, inputs } = group;
       // first check anchor
       if (anchorID === m.id) {
@@ -56,22 +55,19 @@ function stateListener(newState) {
   });
 }
 
-function update() {
-  const { inputGroups, tools } = state;
-  let timenow = Date.now();
-
+export function update(timenow) {
   ctx.clearRect(-10, -10, canvas.width + 10, canvas.height + 10);
   ctx.fillStyle = '#000000';
   // fill black when no video
-  if (!tools.showVideo) ctx.fillRect(-10, -10, canvas.width + 10, canvas.height + 10);
+  if (!toolState.showVideo) ctx.fillRect(-10, -10, canvas.width + 10, canvas.height + 10);
   // Update
   markerData.forEach(m => m.checkPresence(timenow));
   inputGroupData.forEach(i => i.update());
 
-  const { group, input } = tools.targetData;
+  const { group, input } = toolState.targetData;
   let anchor, actor;
 
-  switch (tools.toolMode) {
+  switch (toolState.toolMode) {
     case 'ACTOR_REL_POS':
       anchor = markerData[inputGroups[group].anchorID];
       actor = markerData[inputGroups[group].inputs[input].actorID];
@@ -79,9 +75,9 @@ function update() {
       if (anchor.present && actor.present) {
         if (checkPerspective(anchor, actor, 0.01, 0.0002)) {
           const relPos = relativePosition(anchor, actor, 19);
-          tools.toolMode = 'NONE';
-          inputGroups[group].inputs[input].relativePosition = relPos;
-          setState(state);
+          ToolStore.setProp('toolMode', 'NONE');
+          inputGroupState[group].inputs[input].relativePosition = relPos;
+          InputGroupStore.forceUpdate();
         }
       }
       break;
@@ -92,9 +88,9 @@ function update() {
       if (anchor.present && actor.present) {
         if (checkPerspective(anchor, actor, 0.01, 0.0002)) {
           const endPos = relativePosition(anchor, actor, 19);
-          tools.toolMode = 'NONE';
+          ToolStore.setProp('toolMode', 'NONE');
           inputGroups[group].inputs[input].endPosition = endPos;
-          setState(state);
+          InputGroupStore.forceUpdate();
         }
       }
       break;
@@ -102,21 +98,21 @@ function update() {
   }
 
   // Display
-  if (!tools.renderGroupPreview) markerData.forEach(m => m.display());
+  if (!toolState.renderGroupPreview) markerData.forEach(m => m.display());
   else {
     // do input preview
     inputGroupData.forEach(i => i.display(ctx, 20)); // replace second argument with marker size
   }
 
   // idk if there will be scope issues, but I'm avoiding them anyway
-  window.requestAnimationFrame(update.bind(this));
+  // window.requestAnimationFrame(update.bind(this));
 }
 
 export function getSocket() {
   return socket;
 }
 
-export default function initEditor() {
+export function init() {
   canvas = document.querySelector('canvas');
   frame = document.querySelector('#frame');
   ctx = canvas.getContext('2d');
@@ -136,28 +132,27 @@ export default function initEditor() {
   });
 
   canvas.addEventListener('click', (e) => {
-    const { tools, inputGroups } = state;
     const mousePt = { x: e.offsetX, y: e.offsetY };
     const hitMarker = (m) => (m.present && !m.inuse && pointInRect(mousePt, m.allCorners));
 
-    switch (tools.toolMode) {
+    switch (toolState.toolMode) {
       case 'ANCHOR_SELECT':
         markerData.forEach(m => {
           if (hitMarker(m)) {
-            tools.toolMode = 'NONE';
-            inputGroups[tools.targetData].anchorID = m.id;
-            setState(state);
+            ToolStore.setProp('toolMode', 'NONE');
+            inputGroupState[toolState.targetData].anchorID = m.id;
+            InputGroupStore.forceUpdate();
           }
         });
         break;
       case 'ACTOR_SELECT':
-        const { group, input } = tools.targetData;
+        const { group, input } = toolState.targetData;
 
         markerData.forEach(m => {
           if (hitMarker(m)) {
-            tools.toolMode = 'NONE';
-            inputGroups[group].inputs[input].actorID = m.id;
-            setState(state);
+            ToolStore.setProp('toolMode', 'NONE');
+            inputGroupState[group].inputs[input].actorID = m.id;
+            InputGroupStore.forceUpdate();
           }
         });
         break;
@@ -167,8 +162,7 @@ export default function initEditor() {
 
   socket = io.connect('localhost:5000');
   socket.on('update image', (data) => {
-    const { tools } = state;
-    if (!tools.showVideo) return; // bail when video no show
+    if (!toolState.showVideo) return; // bail when video no show
 
     frame.src = 'data:image/png;base64,' + data.image;
 
@@ -207,10 +201,10 @@ export default function initEditor() {
     }
   });
 
-  addStateListener(stateListener);
+  toolState = ToolStore.getState();
+  inputGroupState = InputGroupStore.getState();
+  InputGroupStore.subscribe(stateListener);
   resize();
-
-  window.requestAnimationFrame(update.bind(this));
 }
 
 window.onresize = resize;
