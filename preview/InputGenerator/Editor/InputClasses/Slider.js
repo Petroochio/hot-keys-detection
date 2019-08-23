@@ -10,7 +10,11 @@ class Slider {
   constructor(markerData, inputData) {
       this.name = inputData.name;
       this.type = inputData.type;
-      this.actor = markerData[inputData.actorID];
+      if (inputData.actorID !== '') {
+        this.actor = markerData[inputData.actorID];
+        this.actor.timeout = inputData.detectWindow;
+        this.actor.inuse = true;
+      }
       this.val = 0;
       this.relativePosition = {
           distance: inputData.relativePosition.distance,
@@ -30,8 +34,6 @@ class Slider {
               vecRot(vecScale(xaxis, this.end.distance), this.end.angle)
               )
           );
-      this.actor.timeout = inputData.detectWindow;
-      this.actor.inuse = true;
       this.pos = {x:0, y:0};
       this.spos = {x:0, y:0};
       this.epos = {x:0, y:0};
@@ -39,6 +41,7 @@ class Slider {
   }
 
   update(parent) {
+    if(!this.actor) return;
     if (this.actor.present) {
         const rwpos = this.actor.center;
         this.pos = vecEMA(this.pos, matrixTransform(parent.matrixQuad2Rect, rwpos), 0.3);
@@ -55,6 +58,7 @@ class Slider {
   }
   
   display(parent, ctx, pxpermm, w) {
+    if(!this.actor) return;
     const screenpos = vecRot(vecScale(xaxis, this.relativePosition.distance*pxpermm), -this.relativePosition.angle);
 
     ctx.save();

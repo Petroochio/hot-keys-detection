@@ -27,9 +27,11 @@ const MARKER_CORNERS = [
 class InputGroup {
   constructor(markerData, config) {
     this.name = config.name;
-    this.anchor = markerData[config.anchorID];
-    this.anchor.timeout = config.detectWindow;
-    this.anchor.inuse = true;
+    if (config.anchorID !== '') {
+      this.anchor = markerData[config.anchorID];
+      this.anchor.timeout = config.detectWindow;
+      this.anchor.inuse = true;
+    }
     this.inputs = config.inputs.map((i) => {
       switch(i.type) {
         case 'BUTTON':
@@ -54,14 +56,18 @@ class InputGroup {
     this.angle = 0;
     this.pos = {x:0, y:0};
 
-
     // Undistortion Matrix stuff
     this.matrixRect2Quad;
     this.matrixQuad2Rect;
   }
 
   calBoundingBox(markerOffsetSize, pxpermm) {
-    let centerPts = this.inputs.map(i => (vecRot(vecScale(xaxis, i.relativePosition.distance*pxpermm), -i.relativePosition.angle)));
+    if (!this.anchor) return;
+    let centerPts = this.inputs.map(i => {
+      if (!i.actor) return { x: 0, y: 0 };
+      // Give each input class a get center point
+      return (vecRot(vecScale(xaxis, i.relativePosition.distance*pxpermm), -i.relativePosition.angle))
+    });
     centerPts.push({x:0, y:0});
 
     // centerPts = centerPts.map(p => vecRot(p, -this.angle));
@@ -83,6 +89,7 @@ class InputGroup {
   }
 
   update() {
+    if (!this.anchor) return;
     this.angle = vecAngleBetween(vecSub(this.anchor.center, this.anchor.corner), angleRefAxis) - CORNER_ANGLE;
     this.pos = vecEMA(this.anchor.center, this.pos, 0.5);
     if (this.anchor.present) {
@@ -97,6 +104,7 @@ class InputGroup {
   }
 
   display(ctx, markerSize) {
+    if (!this.anchor) return;
     if (this.anchor.present) {
 
       const edgelen = this.anchor.allCorners.map((v, i, arr) => vecMag(vecSub(v, arr[(i + 1) % arr.length])));

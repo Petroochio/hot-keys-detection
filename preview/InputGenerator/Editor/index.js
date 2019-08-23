@@ -69,8 +69,8 @@ export function update(timenow) {
 
   switch (toolState.toolMode) {
     case 'ACTOR_REL_POS':
-      anchor = markerData[inputGroups[group].anchorID];
-      actor = markerData[inputGroups[group].inputs[input].actorID];
+      anchor = markerData[inputGroupState[group].anchorID];
+      actor = markerData[inputGroupState[group].inputs[input].actorID];
 
       if (anchor.present && actor.present) {
         if (checkPerspective(anchor, actor, 0.01, 0.0002)) {
@@ -82,14 +82,14 @@ export function update(timenow) {
       }
       break;
     case 'ACTOR_END_POS':
-      anchor = markerData[inputGroups[group].anchorID];
-      actor = markerData[inputGroups[group].inputs[input].actorID];
+      anchor = markerData[inputGroupState[group].anchorID];
+      actor = markerData[inputGroupState[group].inputs[input].actorID];
 
       if (anchor.present && actor.present) {
         if (checkPerspective(anchor, actor, 0.01, 0.0002)) {
           const endPos = relativePosition(anchor, actor, 19);
           ToolStore.setProp('toolMode', 'NONE');
-          inputGroups[group].inputs[input].endPosition = endPos;
+          inputGroupState[group].inputs[input].endPosition = endPos;
           InputGroupStore.forceUpdate();
         }
       }

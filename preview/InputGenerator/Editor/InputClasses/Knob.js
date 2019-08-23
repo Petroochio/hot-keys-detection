@@ -7,33 +7,37 @@ const xaxis = {x:1, y:0};
 
 class Knob {
   constructor(markerData, inputData) {
-      this.name = inputData.name;
-      this.type = inputData.type;
+    this.name = inputData.name;
+    this.type = inputData.type;
+    if (inputData.actorID !== '') {
       this.actor = markerData[inputData.actorID];
-      this.val = 0;
-      this.relativePosition = {
-          distance: inputData.relativePosition.distance,
-          angle: inputData.relativePosition.angle - CORNER_ANGLE,
-      }
       this.actor.timeout = inputData.detectWindow;
       this.actor.inuse = true;
+    }
+    this.val = 0;
+    this.relativePosition = {
+      distance: inputData.relativePosition.distance,
+      angle: inputData.relativePosition.angle - CORNER_ANGLE,
+    };
   }
 
   update(parent) {
-      if (this.actor.present) {
-        const quad2Rect = v => matrixTransform(parent.matrixQuad2Rect, v);
-        //   const anchorVec = vecSub(parent.anchor.center, parent.anchor.corner);
-        //   const actorVec = vecSub(this.actor.center, this.actor.corner);
-        //   const angleBetween = -vecAngleBetween(anchorVec, actorVec);
-        //   this.val = calEMA(angleBetween, this.val, 0.5);
-        const anchorVec = vecSub(quad2Rect(parent.anchor.center), quad2Rect(parent.anchor.corner));
-        const actorVec = vecSub(quad2Rect(this.actor.center), quad2Rect(this.actor.corner));
-        const angleBetween = -vecAngleBetween(anchorVec, actorVec);
-        this.val = calEMA(angleBetween, this.val, 0.5);
-      }
+    if(!this.actor) return;
+    if (this.actor.present) {
+      const quad2Rect = v => matrixTransform(parent.matrixQuad2Rect, v);
+      //   const anchorVec = vecSub(parent.anchor.center, parent.anchor.corner);
+      //   const actorVec = vecSub(this.actor.center, this.actor.corner);
+      //   const angleBetween = -vecAngleBetween(anchorVec, actorVec);
+      //   this.val = calEMA(angleBetween, this.val, 0.5);
+      const anchorVec = vecSub(quad2Rect(parent.anchor.center), quad2Rect(parent.anchor.corner));
+      const actorVec = vecSub(quad2Rect(this.actor.center), quad2Rect(this.actor.corner));
+      const angleBetween = -vecAngleBetween(anchorVec, actorVec);
+      this.val = calEMA(angleBetween, this.val, 0.5);
+    }
   }
 
   display(parent, ctx, pxpermm, w) {
+    if(!this.actor) return;
     const traj = vecScale(vecRot(xaxis, this.val), w/2);
     const screenpos = vecRot(vecScale(xaxis, this.relativePosition.distance*pxpermm), -this.relativePosition.angle);
 

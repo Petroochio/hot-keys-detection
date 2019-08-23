@@ -15,7 +15,7 @@ import { InputGroup, createGroupState } from './InputGroup';
 let root;
 let lastDom;
 let socket;
-let inputGroupsState, toolState, uiState;
+let inputGroupState, toolState, uiState;
 
 let saveHeld = false;
 let saveCount = 0;
@@ -23,22 +23,18 @@ const SAVE_COUNT_MAX = 3000;
 
 export function update(dt) {
   if (saveHeld) {
-    saveCount += dt;
-    // UIStore.setProp('saveCount', uiState.saveCount + dt);
-    // console.log(saveCount);
-
-    renderDom();
+    UIStore.setProp('saveCount', uiState.saveCount + dt);
   }
 }
 
 // maybe put the socket in the state, idk
 function renderDom() {
   const setGroupState = InputGroupStore.setProp;
-  const groups = inputGroupsState
+  const groups = inputGroupState
     .map((g, i) => InputGroup(i, g, toolState, setGroupState));
 
   const addGroup = () => {
-    InputGroupStore.pushGroup(createGroupState(inputGroups.length));
+    InputGroupStore.pushGroup(createGroupState(inputGroupState.length));
   };
   const addGroupButton = h('button.add-group', { on: { click: addGroup } }, 'add input group');
 
@@ -48,19 +44,14 @@ function renderDom() {
   };
   const saveEnd = () => {
     if (saveCount >= SAVE_COUNT_MAX) {
-      // UIStore.setProp('saveHeld', false);
-      // UIStore.setProp('saveCount', 0);
-      console.log('did save');
-      socket.emit('set inputs config', { config: JSON.stringify(inputGroupsState) });
+      socket.emit('set inputs config', { config: JSON.stringify(inputGroupState) });
     }
-    saveHeld = false;
-    saveCount = 0;
-    renderDom();
+    UIStore.setProp('saveHeld', false);
+    UIStore.setProp('saveCount', 0);
   }
   const noSave = () => {
-    saveHeld = false;
-    saveCount = 0;
-    renderDom(); // MAKE A STATE MANAGER FOR UI FOR THIS REASON
+    UIStore.setProp('saveHeld', false);
+    UIStore.setProp('saveCount', 0);
   }
 
   const fillWidth = saveCount >= SAVE_COUNT_MAX ? 100 : saveCount / SAVE_COUNT_MAX * 100;
@@ -104,7 +95,7 @@ export function init(sock) {
   patch(root, lastDom);
   uiState = UIStore.getState();
   toolState = ToolStore.getState();
-  inputGroupsState = InputGroupStore.getState();
+  inputGroupState = InputGroupStore.getState();
 
   ToolStore.subscribe(renderDom)
   InputGroupStore.subscribe(renderDom);
