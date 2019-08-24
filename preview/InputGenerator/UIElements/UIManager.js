@@ -32,9 +32,10 @@ function renderDom() {
   const setMarkerSize = (e) => {
     UIStore.setProp('markerSize', e.target.value);
   };
-  const markerSize = h('div.param-value.marker-size',
+  const markerSize = h('div.param-value.marker-size', [
+    h('span', 'Marker Size'),
     h('input', { on: { change: setMarkerSize }, props: { value: uiState.markerSize } })
-  );
+  ]);
 
   const addGroup = () => {
     InputGroupStore.pushGroup(createGroupState(inputGroupState.length));
