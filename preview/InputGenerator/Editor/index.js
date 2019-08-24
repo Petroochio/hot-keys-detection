@@ -3,13 +3,14 @@ import { pointInRect } from '../Utils/CollisionDetection';
 import { avgCorners } from '../Utils/General';
 import InputGroupStore from '../DataStore/InputGroups';
 import ToolStore from '../DataStore/Tools';
+import UIStore from '../DataStore/UI';
 import { checkPerspective, relativePosition } from './RelativePos';
 import InputGroup from './InputGroup';
 
 let canvas, ctx, socket, frame;
 let frameW, frameH;
 let markerData;
-let inputGroupState, toolState;
+let inputGroupState, toolState, uiState;
 
 let inputGroupData = [];
 function initInputGroup() {
@@ -74,7 +75,7 @@ export function update(timenow) {
 
       if (anchor.present && actor.present) {
         if (checkPerspective(anchor, actor, 0.01, 0.0002)) {
-          const relPos = relativePosition(anchor, actor, 19);
+          const relPos = relativePosition(anchor, actor, uiState.markerSize);
           ToolStore.setProp('toolMode', 'NONE');
           inputGroupState[group].inputs[input].relativePosition = relPos;
           InputGroupStore.forceUpdate();
@@ -87,7 +88,7 @@ export function update(timenow) {
 
       if (anchor.present && actor.present) {
         if (checkPerspective(anchor, actor, 0.01, 0.0002)) {
-          const endPos = relativePosition(anchor, actor, 19);
+          const endPos = relativePosition(anchor, actor, uiState.markerSize);
           ToolStore.setProp('toolMode', 'NONE');
           inputGroupState[group].inputs[input].endPosition = endPos;
           InputGroupStore.forceUpdate();
@@ -203,6 +204,7 @@ export function init() {
 
   toolState = ToolStore.getState();
   inputGroupState = InputGroupStore.getState();
+  uiState = UIStore.getState();
   InputGroupStore.subscribe(stateListener);
   resize();
 }

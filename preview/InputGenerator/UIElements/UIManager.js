@@ -17,12 +17,8 @@ let lastDom;
 let socket;
 let inputGroupState, toolState, uiState;
 
-let saveHeld = false;
-let saveCount = 0;
-const SAVE_COUNT_MAX = 3000;
-
 export function update(dt) {
-  if (saveHeld) {
+  if (uiState.saveHeld) {
     UIStore.setProp('saveCount', uiState.saveCount + dt);
   }
 }
@@ -32,6 +28,13 @@ function renderDom() {
   const setGroupState = InputGroupStore.setProp;
   const groups = inputGroupState
     .map((g, i) => InputGroup(i, g, toolState, setGroupState));
+  
+  const setMarkerSize = (e) => {
+    UIStore.setProp('markerSize', e.target.value);
+  };
+  const markerSize = h('div.param-value.marker-size',
+    h('input', { on: { change: setMarkerSize }, props: { value: uiState.markerSize } })
+  );
 
   const addGroup = () => {
     InputGroupStore.pushGroup(createGroupState(inputGroupState.length));
@@ -39,12 +42,13 @@ function renderDom() {
   const addGroupButton = h('button.add-group', { on: { click: addGroup } }, 'add input group');
 
   const saveStart = () => {
-    // UIStore.setProp('saveHeld', true);
-    saveHeld = true;
+    UIStore.setProp('saveHeld', true);
   };
   const saveEnd = () => {
-    if (saveCount >= SAVE_COUNT_MAX) {
-      socket.emit('set inputs config', { config: JSON.stringify(inputGroupState) });
+    if (uiState.saveCount >= uiState.SAVE_COUNT_MAX) {
+      socket.emit('set inputs config',
+        { config: JSON.stringify({ markerSize: uiState.markerSize, groups: inputGroupState }) }
+      );
     }
     UIStore.setProp('saveHeld', false);
     UIStore.setProp('saveCount', 0);
@@ -54,7 +58,7 @@ function renderDom() {
     UIStore.setProp('saveCount', 0);
   }
 
-  const fillWidth = saveCount >= SAVE_COUNT_MAX ? 100 : saveCount / SAVE_COUNT_MAX * 100;
+  const fillWidth = uiState.saveCount >= uiState.SAVE_COUNT_MAX ? 100 : uiState.saveCount / uiState.SAVE_COUNT_MAX * 100;
   const saveButton = h(
     'button.add-group',
     { on: { mouseup: saveEnd, mousedown: saveStart, mouseout: noSave } },
@@ -82,7 +86,9 @@ function renderDom() {
       h('input',  { props: { type: 'checkbox', checked: toolState.renderGroupPreview }, on: { change: toggleGroup } })
     ]);
   
-  const actionBar = h('div#action-bar', [addGroupButton, saveButton, loadButton, toggleVideoButton, toggleGroupButton]);
+  const actionBar = h('div#action-bar',
+    [markerSize, addGroupButton, saveButton, loadButton, toggleVideoButton, toggleGroupButton]
+  );
 
   const newDom = h('div.input-group-div', [actionBar, ...groups]);
   patch(lastDom, newDom);
@@ -101,5 +107,9 @@ export function init(sock) {
   InputGroupStore.subscribe(renderDom);
   UIStore.subscribe(renderDom);
   socket = sock;
-  socket.on('send inputs config', ({ config }) => InputGroupStore.loadConfig(JSON.parse(config)));
+  socket.on('send inputs config', ({ config }) => {
+    const loadedConfig = JSON.parse(config);
+    UIStore.setProp('markerSize', loadedConfig.markerSize);
+    InputGroupStore.loadConfig(loadedConfig.groups);
+  });
 }
