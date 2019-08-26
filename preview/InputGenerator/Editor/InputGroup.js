@@ -99,7 +99,10 @@ class InputGroup {
       );
 
       this.matrixQuad2Rect = inv(this.matrixRect2Quad);
-      this.inputs.forEach((i) => i.update(this));
+      this.inputs.forEach((i) => {
+        // If an input is generic, this will be undefined since there is no class
+        if (i) i.update(this);
+      });
     }
   }
 
@@ -139,7 +142,8 @@ class InputGroup {
 
       ctx.restore();
       this.inputs.forEach((i) => {
-        i.display(this, ctx, pxpermm, 20*pxpermm);
+        // If an input is generic, this will be undefined since there is no class
+        if (i) i.display(this, ctx, pxpermm, 20*pxpermm);
       });
     }
   }
