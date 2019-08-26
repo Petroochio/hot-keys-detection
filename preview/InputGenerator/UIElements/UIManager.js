@@ -28,15 +28,6 @@ function renderDom() {
   const setGroupState = InputGroupStore.setProp;
   const groups = inputGroupState
     .map((g, i) => InputGroup(i, g, toolState, setGroupState));
-  
-  const setMarkerSize = (e) => {
-    UIStore.setProp('markerSize', e.target.value);
-  };
-  const markerSize = h('div.param-value.marker-size', [
-    h('span', 'Marker Size'),
-    h('input', { on: { change: setMarkerSize }, props: { value: uiState.markerSize } }),
-    h('span.unit', 'mm')
-  ]);
 
   const addGroup = () => {
     InputGroupStore.pushGroup(createGroupState(inputGroupState.length));
@@ -49,7 +40,7 @@ function renderDom() {
   const saveEnd = () => {
     if (uiState.saveCount >= uiState.SAVE_COUNT_MAX) {
       socket.emit('set inputs config',
-        { config: JSON.stringify({ markerSize: uiState.markerSize, groups: inputGroupState }) }
+        { config: JSON.stringify({ groups: inputGroupState }) }
       );
     }
     UIStore.setProp('saveHeld', false);
@@ -89,7 +80,7 @@ function renderDom() {
     ]);
   
   const actionBar = h('div#action-bar',
-    [markerSize, addGroupButton, saveButton, loadButton, toggleVideoButton, toggleGroupButton]
+    [addGroupButton, saveButton, loadButton, toggleVideoButton, toggleGroupButton]
   );
 
   const newDom = h('div.input-group-div', [actionBar, ...groups]);
@@ -111,7 +102,6 @@ export function init(sock) {
   socket = sock;
   socket.on('send inputs config', ({ config }) => {
     const loadedConfig = JSON.parse(config);
-    UIStore.setProp('markerSize', loadedConfig.markerSize);
     InputGroupStore.loadConfig(loadedConfig.groups);
   });
 }

@@ -12,6 +12,7 @@ export function createGroupState(groupID) {
     anchorID: '',
     detectWindow: 250,
     inputs: [],
+    markerSize: 20,
   }
 }
 
@@ -34,6 +35,20 @@ export function InputGroup(groupID, groupState, toolState, setGroupState) {
           }
         )
       ),
+    ]
+  );
+
+  const setMarkerSize = (e) => {
+    groupState.markerSize = e.target.value;
+    setGroupState(groupID, groupState);
+  };
+  const markerSize = h(
+    'li.parameter.input-group.marker-size',
+    [
+      h('span.bullet', ''),
+      h('span.param-type', 'marker size'),
+      h('input.param-value', { on: { change: setMarkerSize }, props: { value: groupState.markerSize } }),
+      h('span.unit', 'mm'),
     ]
   );
 
@@ -110,5 +125,5 @@ export function InputGroup(groupID, groupState, toolState, setGroupState) {
   const actorParent = h('li.parameter.input-object', [...inputs, bulletElement, addInputButton]);
 
   // Whole assembly
-  return h('ul.input-group-list', [name, anchor, detectWindow, actorParent]);
+  return h('ul.input-group-list', [name, anchor, markerSize, detectWindow, actorParent]);
 }

@@ -75,7 +75,7 @@ export function update(timenow) {
 
       if (anchor.present && actor.present) {
         if (checkPerspective(anchor, actor, 0.01, 0.0002)) {
-          const relPos = relativePosition(anchor, actor, uiState.markerSize);
+          const relPos = relativePosition(anchor, actor, inputGroupState[group].markerSize);
           ToolStore.setProp('toolMode', 'NONE');
           inputGroupState[group].inputs[input].relativePosition = relPos;
           InputGroupStore.forceUpdate();
@@ -88,7 +88,7 @@ export function update(timenow) {
 
       if (anchor.present && actor.present) {
         if (checkPerspective(anchor, actor, 0.01, 0.0002)) {
-          const endPos = relativePosition(anchor, actor, uiState.markerSize);
+          const endPos = relativePosition(anchor, actor, inputGroupState[group].markerSize);
           ToolStore.setProp('toolMode', 'NONE');
           inputGroupState[group].inputs[input].endPosition = endPos;
           InputGroupStore.forceUpdate();

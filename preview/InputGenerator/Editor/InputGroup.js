@@ -16,14 +16,6 @@ const xaxis = {x:1, y:0};
 const yaxis = {x:0, y:1};
 const angleRefAxis = xaxis;
 
-const MARKER_SIZE = 20;
-const MARKER_CORNERS = [
-  {x: -MARKER_SIZE/2, y: -MARKER_SIZE/2},
-  {x: MARKER_SIZE/2, y: -MARKER_SIZE/2},
-  {x: MARKER_SIZE/2, y: MARKER_SIZE/2},
-  {x: -MARKER_SIZE/2, y: MARKER_SIZE/2}
-];
-
 class InputGroup {
   constructor(markerData, config) {
     this.name = config.name;
@@ -59,6 +51,14 @@ class InputGroup {
     // Undistortion Matrix stuff
     this.matrixRect2Quad;
     this.matrixQuad2Rect;
+
+    this.markerSize = config.markerSize;
+    this.markerCorners = [
+      { x: -config.markerSize/2, y: -config.markerSize/2 },
+      { x: config.markerSize/2, y: -config.markerSize/2 },
+      { x: config.markerSize/2, y: config.markerSize/2 },
+      { x: -config.markerSize/2, y: config.markerSize/2 }
+    ];
   }
 
   calBoundingBox(markerOffsetSize, pxpermm) {
@@ -95,7 +95,7 @@ class InputGroup {
     if (this.anchor.present) {
       this.matrixRect2Quad = calDistortionMatrices(
         this.anchor.allCorners[0], this.anchor.allCorners[1], this.anchor.allCorners[2], this.anchor.allCorners[3],
-        MARKER_CORNERS[0], MARKER_CORNERS[1], MARKER_CORNERS[2], MARKER_CORNERS[3]
+        this.markerCorners[0], this.markerCorners[1], this.markerCorners[2], this.markerCorners[3]
       );
 
       this.matrixQuad2Rect = inv(this.matrixRect2Quad);
@@ -106,18 +106,18 @@ class InputGroup {
     }
   }
 
-  display(ctx, markerSize) {
+  display(ctx) {
     if (!this.anchor) return;
     if (this.anchor.present) {
 
       const edgelen = this.anchor.allCorners.map((v, i, arr) => vecMag(vecSub(v, arr[(i + 1) % arr.length])));
       const peri = edgelen.reduce((acc, v) => (acc + v));
-      const pxpermm = peri / (markerSize*4);
+      const pxpermm = peri / (this.markerSize*4);
       this.calBoundingBox(50, pxpermm);
 
       calDistortionMatrices(
         this.anchor.allCorners[0], this.anchor.allCorners[1], this.anchor.allCorners[2], this.anchor.allCorners[3],
-        MARKER_CORNERS[0], MARKER_CORNERS[1], MARKER_CORNERS[2], MARKER_CORNERS[3]
+        this.markerCorners[0], this.markerCorners[1], this.markerCorners[2], this.markerCorners[3]
       );
 
       ctx.strokeStyle = 'rgba(255, 255, 255, 1.0)';
@@ -147,7 +147,6 @@ class InputGroup {
       });
     }
   }
-
 }
 
 export default InputGroup;

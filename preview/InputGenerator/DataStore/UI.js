@@ -2,7 +2,6 @@ let state = {
   saveHeld: false,
   saveCount: 0,
   SAVE_COUNT_MAX: 2000,
-  markerSize: 19,
 };
 const stateListeners = [];
 
