@@ -34,7 +34,8 @@ function renderDom() {
   };
   const markerSize = h('div.param-value.marker-size', [
     h('span', 'Marker Size'),
-    h('input', { on: { change: setMarkerSize }, props: { value: uiState.markerSize } })
+    h('input', { on: { change: setMarkerSize }, props: { value: uiState.markerSize } }),
+    h('span.unit', 'mm')
   ]);
 
   const addGroup = () => {

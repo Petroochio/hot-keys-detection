@@ -64,7 +64,7 @@ class InputGroup {
   calBoundingBox(markerOffsetSize, pxpermm) {
     if (!this.anchor) return;
     let centerPts = this.inputs.map(i => {
-      if (!i.actor) return { x: 0, y: 0 };
+      if (!i || !i.actor) return { x: 0, y: 0 };
       // Give each input class a get center point
       return (vecRot(vecScale(xaxis, i.relativePosition.distance*pxpermm), -i.relativePosition.angle))
     });
