@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Configure Mechamarkers Table</title>
+    <title>Car Demo</title>
     <style>
       * {
         margin: 0;
@@ -17,35 +17,46 @@
         overflow: hidden;
       }
 
+      #frame-parent {
+        perspective: 1000px;
+      }
+
       #wireframe1 {
         position: absolute;
-        width: 666px;
-        transform: rotateX(0deg) rotateY(180deg) rotateZ(95deg);
-        top: 148px;
-        left: -146px;
+        border: 2px solid white;
+        top: 0px;
+        left: 0px;
+        min-width: 100px;
+        min-height: 100px;
       }
 
       #wireframe2 {
         position: absolute;
-        width: 612px;
-        transform: rotateX(0deg) rotateY(180deg) rotateZ(94deg);
-        top: 108px;
-        left: 259px;
+        border: 2px solid white;
+        top: 150px;
+        left: 0px;
+        min-width: 100px;
+        min-height: 100px;
       }
 
       #wireframe3 {
         position: absolute;
-        width: 448px;
-        transform: rotateX(10deg) rotateY(180deg) rotateZ(92deg);
-        top: 8px;
-        left: 830px;
+        border: 2px solid white;
+        top: 300px;
+        left: 0px;
+        min-width: 100px;
+        min-height: 100px;
       }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+    <script src="./build/app.js"></script>
   </head>
 
   <body>
-    <img id="wireframe1" src="./wireframe1.png">
-    <img id="wireframe2" src="./wireframe2.png">
-    <img id="wireframe3" src="./wireframe3.png">
+    <div id="frame-parent">
+      <div id="wireframe1" tabindex="0"></div>
+      <div id="wireframe2" tabindex="1"></div>
+      <div id="wireframe3" tabindex="2"></div>
+    </div>
   </body>
 </html>
