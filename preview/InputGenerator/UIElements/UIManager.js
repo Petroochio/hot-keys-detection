@@ -51,11 +51,12 @@ function renderDom() {
     UIStore.setProp('saveCount', 0);
   }
 
-  const fillWidth = uiState.saveCount >= uiState.SAVE_COUNT_MAX ? 100 : uiState.saveCount / uiState.SAVE_COUNT_MAX * 100;
+  const fillWidth = uiState.saveCount >= uiState.SAVE_COUNT_MAX ? 100 : Math.pow(uiState.saveCount / uiState.SAVE_COUNT_MAX, 2) * 100;
+  const fillColor = fillWidth >= 100 ? 'green' : 'rgba(0, 0, 0, 0.4)'
   const saveButton = h(
     'button.add-group',
     { on: { mouseup: saveEnd, mousedown: saveStart, mouseout: noSave } },
-    ['save input config', h('div.save-fill', { style: { width: `${fillWidth}%` } })]
+    ['save input config', h('div.save-fill', { style: { width: `${fillWidth}%`, background: fillColor } })]
   );
 
   const load = () => socket.emit('get inputs config');

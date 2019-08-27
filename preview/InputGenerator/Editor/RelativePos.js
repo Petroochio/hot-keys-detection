@@ -1,5 +1,6 @@
 import { vecMag, vecSub, vecAngleBetween } from '../Utils/Vec2';
 import { calDistortionMatrices, matrixTransform } from '../Utils/Distortion';
+import { inv } from 'mathjs';
 
 // export function checkPerspective(anchor, actor, edgeThres, perimeterThres) {
 //   // array of edge lengths
@@ -56,20 +57,22 @@ export function checkPerspective(anchor, actor, edgeThres, perimeterThres) {
 }
 
 export function relativePosition(anchor, actor, markerSize) {
-  // array of edge lengths
-  const edgelen1 = anchor.allCorners.map((v, i, arr) => vecMag(vecSub(v, arr[(i + 1) % arr.length])));
-  const edgelen2 = actor.allCorners.map((v, i, arr) => vecMag(vecSub(v, arr[(i + 1) % arr.length])));
-  // perimeters
-  const peri1 = edgelen1.reduce((acc, v) => (acc + v));
-  const peri2 = edgelen2.reduce((acc, v) => (acc + v));
-
-  const mmperpx = (markerSize*4) / ((peri1 + peri2)/2);
-
-  const pxdist = vecMag(vecSub(anchor.center, actor.center));
-  const realdist = pxdist * mmperpx;
-  const angle = vecAngleBetween(vecSub(anchor.center, anchor.corner), vecSub(anchor.center, actor.center));
+  const ms = markerSize;
+  const mc = [
+    { x: -ms/2, y: -ms/2 },
+    { x: ms/2, y: -ms/2 },
+    { x: ms/2, y: ms/2 },
+    { x: -ms/2, y: ms/2 }
+  ];
+  const r2q = calDistortionMatrices(
+    anchor.allCorners[0], anchor.allCorners[1], anchor.allCorners[2], anchor.allCorners[3],
+    mc[0], mc[1], mc[2], mc[3]
+  );
+  const q2r = inv(r2q);
+  const ac = matrixTransform(q2r, actor.center);
+  console.timeLog(ms, ac);
   return {
-    distance: realdist,
-    angle: angle,
+    distance: vecMag(ac),
+    angle: vecAngleBetween(vecSub({x:0, y:0}, mc[0]), vecSub({x:0, y:0}, ac)),
   };
 }

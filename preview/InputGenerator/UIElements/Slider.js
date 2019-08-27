@@ -69,7 +69,7 @@ export function Slider(inputID, groupID, inputState, toolState, setInputState) {
   const detectWindow = h(
     'li.parameter.input-group.param-anchor-dw',
     [
-      h('span.param-type', 'anchor detection window'),
+      h('span.param-type', 'actor detection window'),
       h('span.param-value',
         h('input',
           {

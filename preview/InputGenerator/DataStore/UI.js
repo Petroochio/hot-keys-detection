@@ -1,7 +1,7 @@
 let state = {
   saveHeld: false,
   saveCount: 0,
-  SAVE_COUNT_MAX: 2000,
+  SAVE_COUNT_MAX: 1200,
 };
 const stateListeners = [];
 
