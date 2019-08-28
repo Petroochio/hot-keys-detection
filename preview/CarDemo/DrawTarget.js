@@ -1,3 +1,10 @@
+// i and j change height
+// j and l change width
+// a and d rotate x
+// w and s rotate y
+// q and e rotate z
+// - and = set perspective
+
 class DrawTarget {
   constructor(selector, setMove, adjustZoom, storageID) {
     this.element = document.querySelector(selector);
@@ -19,6 +26,7 @@ class DrawTarget {
     this.element.addEventListener('mousedown', (e) => setMove(this));
 
     this.element.addEventListener('keypress', (e) => {
+      console.log(e.key);
       switch (e.key) {
         case 'j':
           this.size.x -= 1;
@@ -67,8 +75,11 @@ class DrawTarget {
     this.element.style.left = this.position.x + 'px';
     this.element.style.top = this.position.y + 'px';
 
-    this.element.style.minWidth = this.size.x + 'px';
-    this.element.style.minHeight = this.size.y + 'px';
+    this.element.style.width = this.size.x + 'px';
+    this.element.style.height = this.size.y + 'px';
+    const canvas = this.element.querySelector('canvas');
+    canvas.width = this.size.x + 'px';
+    canvas.height = this.size.y + 'px';
 
     // this.element.style.perspective = this.zoom + 'px';
     this.element.style.transform = `rotateY(${this.rotation.y}deg) rotateX(${this.rotation.x}deg) rotateZ(${this.rotation.z}deg)`;
