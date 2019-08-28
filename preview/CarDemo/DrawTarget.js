@@ -6,7 +6,7 @@
 // - and = set perspective
 
 class DrawTarget {
-  constructor(selector, setMove, adjustZoom, storageID) {
+  constructor(selector, setMove, storageID) {
     this.element = document.querySelector(selector);
 
     this.storageID = storageID;
@@ -26,7 +26,6 @@ class DrawTarget {
     this.element.addEventListener('mousedown', (e) => setMove(this));
 
     this.element.addEventListener('keypress', (e) => {
-      console.log(e.key);
       switch (e.key) {
         case 'j':
           this.size.x -= 1;
@@ -58,13 +57,6 @@ class DrawTarget {
         case 'e':
           this.rotation.z += 1;
           break;
-        case '-':
-          adjustZoom(-5);
-          break;
-        case '=':
-          adjustZoom(5);
-          break;
-        default: break;
       }
 
       this.updateStyle();

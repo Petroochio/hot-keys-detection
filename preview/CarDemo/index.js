@@ -63,17 +63,31 @@ function init() {
   panel1 = new Panel1(0, 0, 0);
 
   const savedZoom = localStorage.getItem('zoom');
-  zoom = savedZoom != null ? savedZoom : 0;
+  console.log(savedZoom);
+  zoom = savedZoom != null ? parseInt(savedZoom) : 1000;
   const adjustZoom = (change) => {
     zoom += change;
     frameParent.style.perspective = zoom + 'px';
     localStorage.setItem('zoom', zoom);
   };
+  adjustZoom(0);
 
   const setMove = (target) => moveItem = target;
-  const frame1 = new DrawTarget('#wireframe1', setMove, adjustZoom, 'panel1');
-  const frame2 = new DrawTarget('#wireframe2', setMove, adjustZoom, 'panel2');
-  const frame3 = new DrawTarget('#wireframe3', setMove, adjustZoom, 'panel3');
+  const frame1 = new DrawTarget('#wireframe1', setMove, 'panel1');
+  const frame2 = new DrawTarget('#wireframe2', setMove, 'panel2');
+  const frame3 = new DrawTarget('#wireframe3', setMove, 'panel3');
+
+  document.addEventListener('keypress', (e) => {
+    switch (e.key) {
+      case '-':
+        adjustZoom(-5);
+        break;
+      case '=':
+        adjustZoom(5);
+        break;
+      default: break;
+    }
+  });
 
   document.addEventListener('mousemove', (e) => {
     if (moveItem) {
