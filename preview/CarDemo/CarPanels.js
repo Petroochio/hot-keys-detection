@@ -4,13 +4,26 @@ export class Dial {
     this.val = v;
     this.delta = t;
     this.dir = 0;
+    this.d = 0;
+    this.dacc = 0;
   }
 
   update(v) {
     this.val = v;
-    const d = this.val - this.pval;
-    this.dir = Math.abs(d) < this.delta ? 0 : d > 0 ? 1 : -1;
-    this.pval = this.val;
+    if (this.val < -Math.PI*0.5 && this.pval > Math.PI*0.5) {
+      this.d = ((Math.PI + this.val) + (Math.PI - this.pval));
+    } else if (this.val > Math.PI*0.5 && this.pval < -Math.PI*0.5) {
+      this.d = -((Math.PI - this.val) + (Math.PI + this.pval));
+    } else {
+      this.d = this.val - this.pval;
+    }
+    if (Math.abs(this.d) > this.delta) {
+      this.dir = this.d > 0 ? 1 : -1;
+      this.pval = this.val;
+    } else {
+      this.dir = 0;
+    }
+    // this.dir = Math.abs(this.d) < this.delta ? 0 : this.d > 0 ? 1 : -1;
   }
 }
 
@@ -36,10 +49,10 @@ export class PushButton {
 export class Panel1 {
   constructor(b1, k1, k2) {
     this.pushbutton = new PushButton(b1, 0.5);
-    this.dial1 = new Dial(k1, 0.4);
-    this.dial2 = new Dial(k2, 0.4);
+    this.dial1 = new Dial(k1, 0.7);
+    this.dial2 = new Dial(k2, 0.7);
 
-    this.power = false;
+    this.power = true;
 
     this.temp = 64;
     this.minTemp = 40;
@@ -49,21 +62,17 @@ export class Panel1 {
     this.fan = 0.25;
     this.minFan = 0;
     this.maxFan = 1.0;
-    this.fanDelta = 0.05;
+    this.fanDelta = 0.1;
 
     this.canvas = document.querySelector('#panel1canvas');
     this.ctx = this.canvas.getContext('2d');
     this.ctx.translate(0.5, 0.5);
-    this.ctx.strokeStyle = 'white';
-    this.ctx.lineWidth = 2;
-    this.ctx.fillStyle = 'white';
   }
 
   update(b1, k1, k2) {
     this.pushbutton.update(b1);
     this.dial1.update(k1);
     this.dial2.update(k2);
-
     this.power = this.pushbutton.clickDown ? !this.power : this.power;
 
     this.temp = this.dial1.dir > 0 ? this.temp + this.tempDelta : this.dial1.dir < 0 ? this.temp - this.tempDelta : this.temp;
@@ -73,22 +82,163 @@ export class Panel1 {
     this.fan = this.fan > this.maxFan ? this.maxFan : this.fan < this.minFan ? this.minFan : this.fan;
   }
 
-  display(mode) {
+  display(mode, bool) {
+    this.clearCanvas();
     if (this.power) {
       this.ctx.save();
+      this.ctx.strokeStyle = 'white';
+      this.ctx.lineWidth = 2;
+      this.ctx.fillStyle = 'white';
+      if (bool) {
+        switch (mode) {  
+          case 0:
+            this.ctx.font = "50px sans-serif";
+            this.ctx.textAlign = "left";
+            this.ctx.textBaseline = "top";
+            this.ctx.translate(0, 0);
+            this.ctx.rotate(0);
+            this.ctx.fillText(this.temp+' \u00B0'+'F', 150, 70);
+
+            this.ctx.strokeRect(300, 70, 300, 50);
+
+            for (let i=0; i<=this.fan; i=i+this.fanDelta) {
+              this.ctx.fillRect(300 + i*300, 70, 28, 50);
+            }
+            break;
+        }
+      }
+      this.ctx.restore();
+    }
+  }
+
+  clearCanvas() {
+    this.ctx.clearRect(-10, -10, this.canvas.width+10, this.canvas.height+10);
+  }
+}
+
+export class Panel2 {
+  constructor(k1, b1, b2) {
+    this.dial = new Dial(k1, 0.6);
+    this.pushbutton1 = new PushButton(b1, 0.5);
+    this.pushbutton2 = new PushButton(b2, 0.5);
+
+    this.station = 93.3;
+    this.stationDelta = 1.8;
+    this.stationMax = 105.9;
+    this.stationMin = 87.4;
+
+    this.volume = 0.5;
+    this.volumeDelta = 0.02;
+
+    this.canvas = document.querySelector('#panel2canvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.ctx.translate(0.5, 0.5);
+  }
+
+  update(k1, b1, b2) {
+    this.dial.update(k1);
+    this.pushbutton1.update(b1);
+    this.pushbutton2.update(b2);
+
+    this.station = this.pushbutton1.clickDown ? this.station - this.stationDelta : this.station;
+    this.station = this.pushbutton2.clickDown ? this.station + this.stationDelta : this.station;
+    this.station = this.station > this.stationMax ? this.stationMax : this.station < this.stationMin ? this.stationMin : this.station;
+
+    this.volume = this.dial.dir > 0 ? this.volume + this.volumeDelta : this.dial.dir < 0 ? this.volume - this.volumeDelta : this.volume;
+    this.volume = this.volume > 1 ? 1 : this.volume < 0 ? 0 : this.volume;
+  }
+
+  display(mode, bool) {
+    this.clearCanvas();
+    this.ctx.save();
+    this.ctx.strokeStyle = 'white';
+    this.ctx.lineWidth = 2;
+    this.ctx.fillStyle = 'white';
+    if (bool) {
       switch (mode) {  
         case 0:
-          this.ctx.font = "13px sans-serif";
+          this.ctx.font = "50px sans-serif";
           this.ctx.textAlign = "left";
           this.ctx.textBaseline = "top";
           this.ctx.translate(0, 0);
           this.ctx.rotate(0);
-          this.ctx.fillText(this.temp+' \u00B0'+'F', 0, 0);
-          this.ctx.strokeRect(0, 0, 100, 30);
-          this.ctx.fillRect(0, 0, 100*this.fan, 30);
+          this.ctx.fillText(this.station.toFixed(1), 270, 100);
+          this.ctx.font = "25px sans-serif";
+          this.ctx.fillText('FM', 400, 100);
+
+          this.ctx.strokeRect(500, 100, 150, 40);   
+          this.ctx.fillRect(500, 100, 150*this.volume, 40);
           break;
       }
-      this.ctx.restore();
     }
+    this.ctx.restore();
+  }
+
+  clearCanvas() {
+    this.ctx.clearRect(-10, -10, this.canvas.width+10, this.canvas.height+10);
+  }
+}
+
+
+export class Panel3 {
+  constructor(s1, t1) {
+    this.gearVal = s1;
+    this.toggleVal = t1;
+
+    this.gear = '';
+    this.toggle = false;
+
+    this.canvas = document.querySelector('#panel3canvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.ctx.translate(0.5, 0.5);
+  }
+
+  update(s1, t1) {
+    this.gearVal = s1;
+    this.toggleVal = t1;
+
+    this.toggle = this.toggleVal > 0.5 ? false : true;
+
+    if (this.gearVal < 0.1) {
+      this.gear = 'P';
+    } else if (this.gearVal < 0.35) {
+      this.gear = 'R';
+    } else if (this.gearVal < 0.6) {
+      this.gear = 'N';
+    } else if (this.gearVal < 0.93) {
+      this.gear = 'D';
+    } else {
+      this.gear = 'S';
+    }
+
+  }
+
+  display(mode, bool) {
+    this.clearCanvas();
+    this.ctx.save();
+    this.ctx.strokeStyle = 'white';
+    this.ctx.lineWidth = 2;
+    this.ctx.fillStyle = 'white';
+    if (bool) {
+      switch (mode) {  
+        case 0:
+          this.ctx.font = "80px sans-serif";
+          this.ctx.textAlign = "center";
+          this.ctx.textBaseline = "top";
+          this.ctx.translate(0, 0);
+          this.ctx.rotate(0);
+          this.ctx.fillText(this.gear, 160, 150);
+          if (this.toggle) {
+            this.ctx.font = "30px sans-serif";
+            this.ctx.fillText('AWD ON', 160, 250);
+          }
+          break;
+      }
+    }
+    this.ctx.restore();
+  }
+
+  clearCanvas() {
+    this.ctx.clearRect(-10, -10, this.canvas.width+10, this.canvas.height+10);
   }
 }

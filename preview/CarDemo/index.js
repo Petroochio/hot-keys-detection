@@ -4,7 +4,7 @@ import { pointInRect } from '../InputGenerator/Utils/CollisionDetection';
 import { avgCorners } from '../InputGenerator/Utils/General';
 import { checkPerspective, relativePosition } from '../InputGenerator/Editor/RelativePos';
 import InputGroup from '../InputGenerator/Editor/InputGroup';
-import {Panel1} from './CarPanels';
+import {Panel1, Panel2, Panel3} from './CarPanels';
 
 let prevTime = 0;
 let zoom = 1000;
@@ -18,6 +18,11 @@ let panel1, panel2, panel3;
 let inputGroupData = [];
 function initTableInput(inputArr) {
   inputGroupData = inputArr.groups.map((i) => (new InputGroup(markerData, i)));
+
+  panel1 = new Panel1(0, 0, 0);
+  panel2 = new Panel2(0, 0, 0);
+  panel3 = new Panel3(0, 0, 0);
+
 }
 
 let moveItem;
@@ -29,17 +34,31 @@ function update() {
   markerData.forEach(m => m.checkPresence(timenow));
   inputGroupData.forEach(i => i.update());
 
+  // panel1.clearCanvas();
+  // panel2.clearCanvas();
+  // panel3.clearCanvas();
+  let panel2bool = false;
   inputGroupData.forEach(i => {
     switch(i.name) {
       case 'Panel1A':
         panel1.update(i.inputs[2].val, i.inputs[0].val, i.inputs[1].val);
-        panel1.display(0);
+        panel1.display(0, i.anchor.present);
         break;
       case 'Panel2A':
+        panel2.update(i.inputs[0].val, i.inputs[2].val, i.inputs[1].val);
+        panel2.display(0, i.anchor.present);
+        if (i.anchor.present) {
+          panel2bool = true;
+        }
         break;
       case 'Panel3A':
+        panel3.update(i.inputs[0].val, i.inputs[1].val);
+        panel3.display(0, i.anchor.present);
         break;
       case 'Panel2B':
+        if (!panel2bool) {
+
+        }
         break;
       default:
         break;
@@ -60,11 +79,10 @@ function init() {
 
   markerData = initMarkers(dummyCtx);
 
-  panel1 = new Panel1(0, 0, 0);
 
   const savedZoom = localStorage.getItem('zoom');
   console.log(savedZoom);
-  zoom = savedZoom != null ? parseInt(savedZoom) : 1000;
+  zoom = savedZoom != null || parseInt(savedZoom) < 0 ? parseInt(savedZoom) : 1000;
   const adjustZoom = (change) => {
     zoom += change;
     frameParent.style.perspective = zoom + 'px';

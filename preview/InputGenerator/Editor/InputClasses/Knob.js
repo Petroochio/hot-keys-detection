@@ -32,7 +32,7 @@ class Knob {
       const anchorVec = vecSub(quad2Rect(parent.anchor.center), quad2Rect(parent.anchor.corner));
       const actorVec = vecSub(quad2Rect(this.actor.center), quad2Rect(this.actor.corner));
       const angleBetween = -vecAngleBetween(anchorVec, actorVec);
-      this.val = calEMA(angleBetween, this.val, 0.5);
+      this.val = calEMA(angleBetween, this.val, 1.0);
     }
   }
 

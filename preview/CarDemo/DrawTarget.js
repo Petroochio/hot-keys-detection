@@ -69,9 +69,9 @@ class DrawTarget {
 
     this.element.style.width = this.size.x + 'px';
     this.element.style.height = this.size.y + 'px';
-    const canvas = this.element.querySelector('canvas');
-    canvas.width = this.size.x + 'px';
-    canvas.height = this.size.y + 'px';
+    let canvas = this.element.querySelector('canvas');
+    canvas.width = this.size.x;
+    canvas.height = this.size.y;
 
     // this.element.style.perspective = this.zoom + 'px';
     this.element.style.transform = `rotateY(${this.rotation.y}deg) rotateX(${this.rotation.x}deg) rotateZ(${this.rotation.z}deg)`;

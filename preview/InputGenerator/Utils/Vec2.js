@@ -42,7 +42,8 @@ export function vecRot(vec, angle) {
 }
 
 export function vecAngleBetween(vec1, vec2) {
-  return Math.atan2(vec1.y, vec1.x) - Math.atan2(vec2.y, vec2.x);
+  // return Math.atan2(vec1.y, vec1.x) - Math.atan2(vec2.y, vec2.x);
+  return Math.atan2(vec1.x*vec2.y-vec1.y*vec2.x, vec1.x*vec2.x+vec1.y*vec2.y);
 }
 
 export function vecEMA(vec1, vec2, weight) {
