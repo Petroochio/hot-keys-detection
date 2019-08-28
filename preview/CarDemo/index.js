@@ -4,6 +4,7 @@ import { pointInRect } from '../InputGenerator/Utils/CollisionDetection';
 import { avgCorners } from '../InputGenerator/Utils/General';
 import { checkPerspective, relativePosition } from '../InputGenerator/Editor/RelativePos';
 import InputGroup from '../InputGenerator/Editor/InputGroup';
+import {Panel1} from './CarPanels';
 
 let prevTime = 0;
 let zoom = 1000;
@@ -12,6 +13,7 @@ let frameParent;
 let socket;
 let markerData;
 let dummyCanvas, dummyCtx;
+let panel1, panel2, panel3;
 
 let inputGroupData = [];
 function initTableInput(inputArr) {
@@ -29,6 +31,8 @@ function update() {
   inputGroupData.forEach(i => {
     switch(i.name) {
       case 'Panel1A':
+        panel1.update(i.inputs[2].val, i.inputs[0].val, i.inputs[1].val);
+        panel1.display(0);
         break;
       case 'Panel2A':
         break;
@@ -52,7 +56,10 @@ function init() {
   dummyCanvas = document.querySelector('#dummy-canvas');
   dummyCtx = dummyCanvas.getContext('2d');
   dummyCtx.translate(0.5, 0.5);
+
   markerData = initMarkers(dummyCtx);
+
+  panel1 = new Panel1(0, 0, 0);
 
   const adjustZoom = (change) => {
     zoom += change;
