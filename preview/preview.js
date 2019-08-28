@@ -49,17 +49,25 @@ function init() {
   socket.on('update image', (data) => {
     app.markerImage.src = 'data:image/png;base64,' + data.image;
   });
+  socket.on('send camera config', (data) => {
+    Object.keys(data).forEach(key => {
+      if (key === 'camID') {
+        document.querySelector(`input[name=cameraIndex]`).value = data[key];
+      } else {
+        document.querySelector(`input[name=${key}]`).value = data[key];
+      }
+    });
+  });
+  socket.emit('get camera config');
 
   const sendParam = (e) => {
     console.log(e.target.name, e.target.value);
     if (e.target.name == 'cameraIndex') {
-      console.log('yes');
       socket.emit(
         'set camera',
         { camID: e.target.value }
       );
     } else {
-      console.log('no');
       socket.emit(
         'set attribute',
         { attr: e.target.name, value: e.target.value }
