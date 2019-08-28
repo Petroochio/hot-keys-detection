@@ -1,28 +1,22 @@
 class DrawTarget {
-  constructor(selector, adjustZoom) {
+  constructor(selector, setMove, adjustZoom, storageID) {
     this.element = document.querySelector(selector);
 
-    this.mouseDown = false;
-    this.mouseOffset = { x: 0, y: 0 };
-    this.position = { x: 0, y: 0};
-    this.rotation = { x: 0, y: 0, z: 0 };
-    this.size = { x: 100, y: 100 }
-    this.zoom = 0;
+    this.storageID = storageID;
 
-    this.element.addEventListener('mousedown', (e) => this.mouseDown = true);
-    this.element.addEventListener('mouseup', (e) => {
-      this.mouseDown = false;
-    });
-    this.element.addEventListener('mouseout', (e) => this.mouseDown = false);
+    const savedData = JSON.parse(localStorage.getItem(this.storageID));
+    if (savedData) {
+      this.position = { x: savedData.position.x, y: savedData.position.y};
+      this.rotation = { x: savedData.rotation.x, y: savedData.rotation.y, z: savedData.rotation.z };
+      this.size = { x: savedData.size.x, y: savedData.size.y };
+    } else {
+      this.position = { x: 0, y: 0};
+      this.rotation = { x: 0, y: 0, z: 0 };
+      this.size = { x: 100, y: 100 }
+    }
+    this.updateStyle();
 
-    this.element.addEventListener('mousemove', (e) => {
-      if (this.mouseDown) {
-        this.position.x += e.movementX;
-        this.position.y += e.movementY;
-
-        this.updateStyle();
-      }
-    });
+    this.element.addEventListener('mousedown', (e) => setMove(this));
 
     this.element.addEventListener('keypress', (e) => {
       switch (e.key) {
@@ -78,6 +72,13 @@ class DrawTarget {
 
     // this.element.style.perspective = this.zoom + 'px';
     this.element.style.transform = `rotateY(${this.rotation.y}deg) rotateX(${this.rotation.x}deg) rotateZ(${this.rotation.z}deg)`;
+
+    const dataToStore = {
+      position: { x: this.position.x, y: this.position.y},
+      rotation: { x: this.rotation.x, y: this.rotation.y, z: this.rotation.z },
+      size: { x: this.size.x, y: this.size.y },
+    };
+    localStorage.setItem(this.storageID, JSON.stringify(dataToStore));
   }
 }
 

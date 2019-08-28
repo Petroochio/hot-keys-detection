@@ -18,8 +18,9 @@ let panel1, panel2, panel3;
 let inputGroupData = [];
 function initTableInput(inputArr) {
   inputGroupData = inputArr.groups.map((i) => (new InputGroup(markerData, i)));
-  console.log(inputGroupData);
 }
+
+let moveItem;
 
 function update() {
   const timenow = Date.now();
@@ -61,20 +62,39 @@ function init() {
 
   panel1 = new Panel1(0, 0, 0);
 
+  const savedZoom = localStorage.getItem('zoom');
+  zoom = savedZoom != null ? savedZoom : 0;
   const adjustZoom = (change) => {
     zoom += change;
     frameParent.style.perspective = zoom + 'px';
+    localStorage.setItem('zoom', zoom);
   };
-  const frame1 = new DrawTarget('#wireframe1', adjustZoom);
-  const frame2 = new DrawTarget('#wireframe2', adjustZoom);
-  const frame3 = new DrawTarget('#wireframe3', adjustZoom);
+
+  const setMove = (target) => moveItem = target;
+  const frame1 = new DrawTarget('#wireframe1', setMove, adjustZoom, 'panel1');
+  const frame2 = new DrawTarget('#wireframe2', setMove, adjustZoom, 'panel2');
+  const frame3 = new DrawTarget('#wireframe3', setMove, adjustZoom, 'panel3');
+
+  document.addEventListener('mousemove', (e) => {
+    if (moveItem) {
+      moveItem.position.x += e.movementX;
+      moveItem.position.y += e.movementY;
+
+      moveItem.updateStyle();
+    }
+  });
+  document.addEventListener('mouseup', (e) => {
+    moveItem = null;
+  });
+  // frameParent.addEventListener('mouseout', (e) => {
+  //   moveItem = null;
+  // });
 
   window.requestAnimationFrame(update.bind(this));
 
   socket = io.connect('localhost:5000');
 
   socket.on('connect', () => {
-    console.log('connected to server');
     socket.emit('get inputs config')
   });
 
