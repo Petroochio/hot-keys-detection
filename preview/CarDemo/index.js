@@ -48,22 +48,22 @@ function update() {
   inputGroupData.forEach(i => {
     switch(i.name) {
       case 'Panel1A':
-        panel1.update(i.inputs[2].val, i.inputs[0].val, i.inputs[1].val, panel1present);
+        panel1.update(i.inputs[2].val, i.inputs[0].val, i.inputs[1].val, panel1present, i.anchor.present);
         panel1.display(0, i.anchor.present);
         if (i.anchor.present) panel1count++;
         break;
       case 'Panel2A':
-        panel2.update(i.inputs[0].val, i.inputs[2].val, i.inputs[1].val, panel2present);
+        panel2.update(i.inputs[0].val, i.inputs[2].val, i.inputs[1].val, panel2present, i.anchor.present);
         panel2.display(0, i.anchor.present);
         if (i.anchor.present) panel2count++;
         break;
       case 'Panel3A':
-        panel3.update(i.inputs[0].val, i.inputs[1].val, panel3present);
+        panel3.update(i.inputs[0].val, i.inputs[1].val, panel3present, i.anchor.present);
         panel3.display(0, i.anchor.present);
         if (i.anchor.present) panel3count++;
         break;
       case 'Panel2B':
-        panel2.update(i.inputs[0].val, i.inputs[2].val, i.inputs[1].val, panel2present);
+        panel2.update(i.inputs[0].val, i.inputs[2].val, i.inputs[1].val, panel2present, i.anchor.present);
         panel2.display(1, i.anchor.present);
         if (i.anchor.present) panel2count++;
         break;

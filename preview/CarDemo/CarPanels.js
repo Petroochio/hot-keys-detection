@@ -21,7 +21,9 @@ export class Dial {
     }
 
     const timenow = Date.now();
+
     if (Math.abs(this.d) > this.delta && timenow - this.timestamp > this.debounce) {
+      console.log(this.d);
       this.dir = this.d > 0 ? 1 : -1;
       this.pval = this.val;
       this.timestamp = Date.now();
@@ -53,8 +55,8 @@ export class PushButton {
 export class Panel1 {
   constructor(b1, k1, k2) {
     this.pushbutton = new PushButton(b1, 0.5);
-    this.dial1 = new Dial(k1, 0.01, 300); // old thres = 0.7
-    this.dial2 = new Dial(k2, 0.01, 300);
+    this.dial1 = new Dial(k1, 0.3, 400); // old thres = 0.7
+    this.dial2 = new Dial(k2, 0.3, 400);
 
     this.power = true;
 
@@ -73,9 +75,9 @@ export class Panel1 {
     this.ctx.translate(0.5, 0.5);
   }
 
-  update(b1, k1, k2, present) {
+  update(b1, k1, k2, prevpresent, present) {
 
-    if (!present) {
+    if (!prevpresent && present) {
       this.dial1.val = k1;
       this.dial1.pval = k1;
       this.dial2.val = k2;
@@ -83,16 +85,18 @@ export class Panel1 {
       return;
     }
 
-    this.pushbutton.update(b1);
-    this.dial1.update(k1);
-    this.dial2.update(k2);
-    this.power = this.pushbutton.clickDown ? !this.power : this.power;
+    if (present) {
+      this.pushbutton.update(b1);
+      this.dial1.update(k1);
+      this.dial2.update(k2);
+      this.power = this.pushbutton.clickDown ? !this.power : this.power;
 
-    this.temp = this.dial1.dir > 0 ? this.temp + this.tempDelta : this.dial1.dir < 0 ? this.temp - this.tempDelta : this.temp;
-    this.temp = this.temp > this.maxTemp ? this.maxTemp : this.temp < this.minTemp ? this.minTemp : this.temp;
+      this.temp = this.dial1.dir > 0 ? this.temp + this.tempDelta : this.dial1.dir < 0 ? this.temp - this.tempDelta : this.temp;
+      this.temp = this.temp > this.maxTemp ? this.maxTemp : this.temp < this.minTemp ? this.minTemp : this.temp;
 
-    this.fan = this.dial2.dir > 0 ? this.fan + this.fanDelta : this.dial2.dir < 0 ? this.fan - this.fanDelta : this.fan;
-    this.fan = this.fan > this.maxFan ? this.maxFan : this.fan < this.minFan ? this.minFan : this.fan;
+      this.fan = this.dial2.dir > 0 ? this.fan + this.fanDelta : this.dial2.dir < 0 ? this.fan - this.fanDelta : this.fan;
+      this.fan = this.fan > this.maxFan ? this.maxFan : this.fan < this.minFan ? this.minFan : this.fan;
+    }
   }
 
   display(mode, bool) {
@@ -130,7 +134,7 @@ export class Panel1 {
 
 export class Panel2 {
   constructor(k1, b1, b2) {
-    this.dial = new Dial(k1, 0.01, 300);
+    this.dial = new Dial(k1, 0.3, 200);
     this.pushbutton1 = new PushButton(b1, 0.5);
     this.pushbutton2 = new PushButton(b2, 0.5);
 
@@ -147,24 +151,26 @@ export class Panel2 {
     this.ctx.translate(0.5, 0.5);
   }
 
-  update(k1, b1, b2, present) {
+  update(k1, b1, b2, prevpresent, present) {
     
-    if (!present) {
+    if (!prevpresent && present) {
       this.dial.val = k1;
       this.dial.pval = k1;
       return;
     }
 
-    this.dial.update(k1);
-    this.pushbutton1.update(b1);
-    this.pushbutton2.update(b2);
+    if (present) {
+      this.dial.update(k1);
+      this.pushbutton1.update(b1);
+      this.pushbutton2.update(b2);
 
-    this.station = this.pushbutton1.clickDown ? this.station - this.stationDelta : this.station;
-    this.station = this.pushbutton2.clickDown ? this.station + this.stationDelta : this.station;
-    this.station = this.station > this.stationMax ? this.stationMax : this.station < this.stationMin ? this.stationMin : this.station;
+      this.station = this.pushbutton1.clickDown ? this.station - this.stationDelta : this.station;
+      this.station = this.pushbutton2.clickDown ? this.station + this.stationDelta : this.station;
+      this.station = this.station > this.stationMax ? this.stationMax : this.station < this.stationMin ? this.stationMin : this.station;
 
-    this.volume = this.dial.dir > 0 ? this.volume + this.volumeDelta : this.dial.dir < 0 ? this.volume - this.volumeDelta : this.volume;
-    this.volume = this.volume > 1 ? 1 : this.volume < 0 ? 0 : this.volume;
+      this.volume = this.dial.dir > 0 ? this.volume + this.volumeDelta : this.dial.dir < 0 ? this.volume - this.volumeDelta : this.volume;
+      this.volume = this.volume > 1 ? 1 : this.volume < 0 ? 0 : this.volume;
+    }
   }
 
   display(mode, bool) {
@@ -194,12 +200,12 @@ export class Panel2 {
           this.ctx.textBaseline = "top";
           this.ctx.translate(0, 0);
           this.ctx.rotate(0);
-          this.ctx.fillText(this.station.toFixed(1), 270, 100);
+          this.ctx.fillText(this.station.toFixed(1), 400, 130);
           this.ctx.font = "25px sans-serif";
-          this.ctx.fillText('FM', 400, 100);
+          this.ctx.fillText('FM', 530, 130);
 
-          this.ctx.strokeRect(500, 100, 150, 40);   
-          this.ctx.fillRect(500, 100, 150*this.volume, 40);
+          this.ctx.strokeRect(400, 200, 230, 40);   
+          this.ctx.fillRect(400, 200, 230*this.volume, 40);
       }
     }
     this.ctx.restore();
@@ -224,22 +230,25 @@ export class Panel3 {
     this.ctx.translate(0.5, 0.5);
   }
 
-  update(s1, t1, present) {
-    this.gearVal = s1;
-    this.toggleVal = t1;
+  update(s1, t1, prevpresent, present) {
 
-    this.toggle = this.toggleVal > 0.5 ? false : true;
+    if (present) {
+      this.gearVal = s1;
+      this.toggleVal = t1;
 
-    if (this.gearVal < 0.1) {
-      this.gear = 'P';
-    } else if (this.gearVal < 0.35) {
-      this.gear = 'R';
-    } else if (this.gearVal < 0.6) {
-      this.gear = 'N';
-    } else if (this.gearVal < 0.93) {
-      this.gear = 'D';
-    } else {
-      this.gear = 'S';
+      this.toggle = this.toggleVal > 0.5 ? false : true;
+
+      if (this.gearVal < 0.1) {
+        this.gear = 'P';
+      } else if (this.gearVal < 0.35) {
+        this.gear = 'R';
+      } else if (this.gearVal < 0.6) {
+        this.gear = 'N';
+      } else if (this.gearVal < 0.93) {
+        this.gear = 'D';
+      } else {
+        this.gear = 'S';
+      }
     }
 
   }
@@ -257,10 +266,10 @@ export class Panel3 {
           this.ctx.textBaseline = "top";
           this.ctx.translate(0, 0);
           this.ctx.rotate(0);
-          this.ctx.fillText(this.gear, 160, 150);
+          this.ctx.fillText(this.gear, 200, 150);
           if (this.toggle) {
             this.ctx.font = "30px sans-serif";
-            this.ctx.fillText('AWD ON', 160, 250);
+            this.ctx.fillText('AWD ON', 200, 250);
           }
           break;
       }
