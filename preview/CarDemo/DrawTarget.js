@@ -25,6 +25,30 @@ class DrawTarget {
 
     this.element.addEventListener('mousedown', (e) => setMove(this));
 
+    this.element.addEventListener('keydown', (e) => {
+      // 37
+      // up = 38
+      // right = 39
+      // down = 40
+      switch (e.keyCode) {
+        case 37:
+          this.position.x -= 1;
+          break;
+        case 39:
+          this.position.x += 1;
+          break;
+        case 38:
+          this.position.y -= 1;
+          break;
+        case 40:
+          this.position.y += 1;
+          break;
+        default: break;
+      }
+
+      this.updateStyle();
+    });
+
     this.element.addEventListener('keypress', (e) => {
       switch (e.key) {
         case 'j':
