@@ -1,15 +1,17 @@
 export class Dial {
-  constructor(v, t) {
+  constructor(v, t, db) {
     this.pval = v;
     this.val = v;
     this.delta = t;
     this.dir = 0;
     this.d = 0;
-    this.dacc = 0;
+    this.debounce = db;
+    this.timestamp = Date.now();
   }
 
   update(v) {
     this.val = v;
+
     if (this.val < -Math.PI*0.5 && this.pval > Math.PI*0.5) {
       this.d = ((Math.PI + this.val) + (Math.PI - this.pval));
     } else if (this.val > Math.PI*0.5 && this.pval < -Math.PI*0.5) {
@@ -17,13 +19,15 @@ export class Dial {
     } else {
       this.d = this.val - this.pval;
     }
-    if (Math.abs(this.d) > this.delta) {
+
+    const timenow = Date.now();
+    if (Math.abs(this.d) > this.delta && timenow - this.timestamp > this.debounce) {
       this.dir = this.d > 0 ? 1 : -1;
       this.pval = this.val;
+      this.timestamp = Date.now();
     } else {
       this.dir = 0;
     }
-    // this.dir = Math.abs(this.d) < this.delta ? 0 : this.d > 0 ? 1 : -1;
   }
 }
 
@@ -49,8 +53,8 @@ export class PushButton {
 export class Panel1 {
   constructor(b1, k1, k2) {
     this.pushbutton = new PushButton(b1, 0.5);
-    this.dial1 = new Dial(k1, 0.7);
-    this.dial2 = new Dial(k2, 0.7);
+    this.dial1 = new Dial(k1, 0.01, 300); // old thres = 0.7
+    this.dial2 = new Dial(k2, 0.01, 300);
 
     this.power = true;
 
@@ -69,7 +73,16 @@ export class Panel1 {
     this.ctx.translate(0.5, 0.5);
   }
 
-  update(b1, k1, k2) {
+  update(b1, k1, k2, present) {
+
+    if (!present) {
+      this.dial1.val = k1;
+      this.dial1.pval = k1;
+      this.dial2.val = k2;
+      this.dial2.pval = k2;
+      return;
+    }
+
     this.pushbutton.update(b1);
     this.dial1.update(k1);
     this.dial2.update(k2);
@@ -83,7 +96,6 @@ export class Panel1 {
   }
 
   display(mode, bool) {
-    this.clearCanvas();
     if (this.power) {
       this.ctx.save();
       this.ctx.strokeStyle = 'white';
@@ -118,7 +130,7 @@ export class Panel1 {
 
 export class Panel2 {
   constructor(k1, b1, b2) {
-    this.dial = new Dial(k1, 0.6);
+    this.dial = new Dial(k1, 0.01, 300);
     this.pushbutton1 = new PushButton(b1, 0.5);
     this.pushbutton2 = new PushButton(b2, 0.5);
 
@@ -135,7 +147,14 @@ export class Panel2 {
     this.ctx.translate(0.5, 0.5);
   }
 
-  update(k1, b1, b2) {
+  update(k1, b1, b2, present) {
+    
+    if (!present) {
+      this.dial.val = k1;
+      this.dial.pval = k1;
+      return;
+    }
+
     this.dial.update(k1);
     this.pushbutton1.update(b1);
     this.pushbutton2.update(b2);
@@ -149,7 +168,6 @@ export class Panel2 {
   }
 
   display(mode, bool) {
-    this.clearCanvas();
     this.ctx.save();
     this.ctx.strokeStyle = 'white';
     this.ctx.lineWidth = 2;
@@ -169,6 +187,19 @@ export class Panel2 {
           this.ctx.strokeRect(500, 100, 150, 40);   
           this.ctx.fillRect(500, 100, 150*this.volume, 40);
           break;
+        
+        case 1:
+          this.ctx.font = "50px sans-serif";
+          this.ctx.textAlign = "left";
+          this.ctx.textBaseline = "top";
+          this.ctx.translate(0, 0);
+          this.ctx.rotate(0);
+          this.ctx.fillText(this.station.toFixed(1), 270, 100);
+          this.ctx.font = "25px sans-serif";
+          this.ctx.fillText('FM', 400, 100);
+
+          this.ctx.strokeRect(500, 100, 150, 40);   
+          this.ctx.fillRect(500, 100, 150*this.volume, 40);
       }
     }
     this.ctx.restore();
@@ -193,7 +224,7 @@ export class Panel3 {
     this.ctx.translate(0.5, 0.5);
   }
 
-  update(s1, t1) {
+  update(s1, t1, present) {
     this.gearVal = s1;
     this.toggleVal = t1;
 
@@ -214,7 +245,6 @@ export class Panel3 {
   }
 
   display(mode, bool) {
-    this.clearCanvas();
     this.ctx.save();
     this.ctx.strokeStyle = 'white';
     this.ctx.lineWidth = 2;

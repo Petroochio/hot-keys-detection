@@ -15,6 +15,10 @@ let markerData;
 let dummyCanvas, dummyCtx;
 let panel1, panel2, panel3;
 
+let panel1present = false;
+let panel2present = false;
+let panel3present = false;
+
 let inputGroupData = [];
 function initTableInput(inputArr) {
   inputGroupData = inputArr.groups.map((i) => (new InputGroup(markerData, i)));
@@ -34,36 +38,42 @@ function update() {
   markerData.forEach(m => m.checkPresence(timenow));
   inputGroupData.forEach(i => i.update());
 
-  // panel1.clearCanvas();
-  // panel2.clearCanvas();
-  // panel3.clearCanvas();
-  let panel2bool = false;
+  if (panel1 !== undefined) panel1.clearCanvas();
+  if (panel2 !== undefined) panel2.clearCanvas();
+  if (panel3 !== undefined) panel3.clearCanvas();
+  
+  let panel1count = 0;
+  let panel2count = 0;
+  let panel3count = 0;
   inputGroupData.forEach(i => {
     switch(i.name) {
       case 'Panel1A':
-        panel1.update(i.inputs[2].val, i.inputs[0].val, i.inputs[1].val);
+        panel1.update(i.inputs[2].val, i.inputs[0].val, i.inputs[1].val, panel1present);
         panel1.display(0, i.anchor.present);
+        if (i.anchor.present) panel1count++;
         break;
       case 'Panel2A':
-        panel2.update(i.inputs[0].val, i.inputs[2].val, i.inputs[1].val);
+        panel2.update(i.inputs[0].val, i.inputs[2].val, i.inputs[1].val, panel2present);
         panel2.display(0, i.anchor.present);
-        if (i.anchor.present) {
-          panel2bool = true;
-        }
+        if (i.anchor.present) panel2count++;
         break;
       case 'Panel3A':
-        panel3.update(i.inputs[0].val, i.inputs[1].val);
+        panel3.update(i.inputs[0].val, i.inputs[1].val, panel3present);
         panel3.display(0, i.anchor.present);
+        if (i.anchor.present) panel3count++;
         break;
       case 'Panel2B':
-        if (!panel2bool) {
-
-        }
+        panel2.update(i.inputs[0].val, i.inputs[2].val, i.inputs[1].val, panel2present);
+        panel2.display(1, i.anchor.present);
+        if (i.anchor.present) panel2count++;
         break;
       default:
         break;
     }
   });
+  panel1present = panel1count > 0 ? true : false;
+  panel2present = panel2count > 0 ? true : false;
+  panel3present = panel3count > 0 ? true : false;
 
   prevTime = timenow;
 

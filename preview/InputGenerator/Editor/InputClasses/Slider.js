@@ -53,7 +53,7 @@ class Slider {
         
         let v = lineCP(this.epos, this.pos, this.spos).t;
         v = v > 1 ? 1 : v < 0 ? 0 : v; // constraining v between 0 to 1
-        this.val = calEMA(v, this.val, 0.5);
+        this.val = calEMA(v, this.val, 0.9);
     }
   }
   
