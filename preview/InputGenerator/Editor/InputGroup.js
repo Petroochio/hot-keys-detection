@@ -11,7 +11,7 @@ const config = {};
 const { vecSub, vecRot, vecScale, vecAngleBetween, vecEMA, vecMag } = Vec2;
 
 // These need to be made constants
-const CORNER_ANGLE = -3*Math.PI/4;
+// const CORNER_ANGLE = -3*Math.PI/4;
 const xaxis = {x:1, y:0};
 const yaxis = {x:0, y:1};
 const angleRefAxis = xaxis;
@@ -59,6 +59,9 @@ class InputGroup {
       { x: config.markerSize/2, y: config.markerSize/2 },
       { x: -config.markerSize/2, y: config.markerSize/2 }
     ];
+
+    this.cornerAngleGroup = 1*Math.PI/4;
+    this.cornerAngleInput = -1*Math.PI/4;
   }
 
   calBoundingBox(markerOffsetSize, pxpermm) {
@@ -66,7 +69,7 @@ class InputGroup {
     let centerPts = this.inputs.map(i => {
       if (!i || !i.actor) return { x: 0, y: 0 };
       // Give each input class a get center point
-      return (vecRot(vecScale(xaxis, i.relativePosition.distance*pxpermm), -i.relativePosition.angle))
+      return (vecRot(vecScale(xaxis, i.relativePosition.distance*pxpermm), i.relativePosition.angle - this.cornerAngleInput));
     });
     centerPts.push({x:0, y:0});
 
@@ -90,7 +93,7 @@ class InputGroup {
 
   update() {
     if (!this.anchor) return;
-    this.angle = vecAngleBetween(vecSub(this.anchor.center, this.anchor.corner), angleRefAxis) - CORNER_ANGLE;
+    this.angle = -vecAngleBetween(vecSub(this.anchor.center, this.anchor.corner), angleRefAxis) - this.cornerAngleGroup;
     this.pos = vecEMA(this.anchor.center, this.pos, 0.5);
     if (this.anchor.present) {
       this.matrixRect2Quad = calDistortionMatrices(

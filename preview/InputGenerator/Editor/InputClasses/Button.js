@@ -1,7 +1,6 @@
 import { calEMA } from '../../Utils/General';
 import { vecSub, vecMag, vecRot, vecScale, vecEMA, lineCP, vecUnit } from '../../Utils/Vec2';
 
-const CORNER_ANGLE = -3*Math.PI/4;
 const xaxis = {x:1, y:0};
 const yaxis = {x:0, y:1};
 
@@ -17,7 +16,7 @@ class Button {
     this.val = 0;
     this.relativePosition = {
       distance: inputData.relativePosition.distance,
-      angle: inputData.relativePosition.angle - CORNER_ANGLE,
+      angle: inputData.relativePosition.angle,
     };
   }
 
@@ -29,7 +28,7 @@ class Button {
 
   display(parent, ctx, pxpermm, w) {
     if(!this.actor) return;
-    const screenpos = vecRot(vecScale(xaxis, this.relativePosition.distance*pxpermm), -this.relativePosition.angle);
+    const screenpos = vecRot(vecScale(xaxis, this.relativePosition.distance*pxpermm), this.relativePosition.angle - parent.cornerAngleInput);
 
     ctx.save();
 

@@ -144,7 +144,7 @@ export class Panel2 {
     this.stationMin = 87.4;
 
     this.volume = 0.5;
-    this.volumeDelta = 0.02;
+    this.volumeDelta = 0.05;
 
     this.canvas = document.querySelector('#panel2canvas');
     this.ctx = this.canvas.getContext('2d');
@@ -200,12 +200,12 @@ export class Panel2 {
           this.ctx.textBaseline = "top";
           this.ctx.translate(0, 0);
           this.ctx.rotate(0);
-          this.ctx.fillText(this.station.toFixed(1), 400, 130);
+          this.ctx.fillText(this.station.toFixed(1), 430, 130);
           this.ctx.font = "25px sans-serif";
-          this.ctx.fillText('FM', 530, 130);
+          this.ctx.fillText('FM', 560, 130);
 
-          this.ctx.strokeRect(400, 200, 230, 40);   
-          this.ctx.fillRect(400, 200, 230*this.volume, 40);
+          this.ctx.strokeRect(430, 200, 230, 40);   
+          this.ctx.fillRect(430, 200, 230*this.volume, 40);
       }
     }
     this.ctx.restore();
