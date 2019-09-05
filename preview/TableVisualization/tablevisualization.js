@@ -107,7 +107,7 @@ function updateVis() {
   markerData.forEach(m => m.checkPresence(timenow));
 
   ctx.clearRect(-10, -10, window.innerWidth+10, window.innerHeight+10);
-  markerData.forEach(m => m.display(90));
+  // markerData.forEach(m => m.display(90));
 
   // relPos2Marker(0, 1);
 

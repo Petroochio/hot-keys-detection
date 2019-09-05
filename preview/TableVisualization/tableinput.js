@@ -79,12 +79,10 @@ const dummyInputData = [inputGroup0, inputGroup1, inputGroup2, inputGroup3];
 let inputGroupData = [];
 
 function initTableInput(inputArr) {
-    console.log(inputArr);
-    inputGroupData = inputArr.map((i) => (new TableInputGroup(markerData, i)));
+    inputGroupData = inputArr.groups.map((i) => (new TableInputGroup(markerData, i)));
     inputGroupData.forEach((i) => i.calBoundingBox(30));
 }
 
-const CORNER_ANGLE = -3*Math.PI/4;
 const angleRefAxis = xaxis;
 
 function debugVec(start, end, color) {
@@ -103,21 +101,6 @@ class TableInputGroup {
         this.anchor = markerData[config.anchorID];
         this.anchor.timeout = config.detectWindow;
         this.anchor.inuse = true;
-        this.inputs = config.inputs.map((i) => {
-            switch(i.type) {
-                case 'BUTTON':
-                    return new Button(markerData, i);
-                case 'TOGGLE':
-                    return new Toggle(markerData, i);
-                case 'KNOB':
-                    return new Knob(markerData, i);
-                case 'SLIDER':
-                    return new Slider(markerData, i);
-                default:
-                    break;
-            }   
-        });
-
         this.boundingBox = { //set with calBoundingBox()
             x: -1, 
             y: -1,
@@ -126,11 +109,29 @@ class TableInputGroup {
         };
         this.angle = 0;
         this.pos = {x:0, y:0};
+
+        this.cornerAngleGroup = -3*Math.PI/4;
+        this.cornerAngleInput = -3*Math.PI/4;
+
+        this.inputs = config.inputs.map((i) => {
+            switch(i.type) {
+                case 'BUTTON':
+                    return new Button(markerData, i, this);
+                case 'TOGGLE':
+                    return new Toggle(markerData, i, this);
+                case 'KNOB':
+                    return new Knob(markerData, i, this);
+                case 'SLIDER':
+                    return new Slider(markerData, i, this);
+                default:
+                    break;
+            }   
+        });
     }
 
     calBoundingBox(markerOffsetSize) {
         
-        let centerPts = this.inputs.map((i) => vecRot(vecScale(yaxis, i.relativePosition.distance), i.relativePosition.angle));
+        let centerPts = this.inputs.map((i) => vecRot(vecScale(yaxis, i.relativePosition.distance), -i.relativePosition.angle - this.cornerAngleInput));
         centerPts.push({x:0, y:0});
 
         // centerPts.forEach(p => {
@@ -159,7 +160,7 @@ class TableInputGroup {
     }
 
     update() {
-        this.angle = vecAngleBetween(vecSub(this.anchor.center, this.anchor.corner), angleRefAxis) - CORNER_ANGLE;
+        this.angle = vecAngleBetween(vecSub(this.anchor.center, this.anchor.corner), angleRefAxis) - this.cornerAngleGroup;
         this.pos = this.anchor.center;
         this.inputs.forEach((i) => i.update(this));
     }
@@ -171,6 +172,7 @@ class TableInputGroup {
             const bbPosY = unitToScreen(this.boundingBox.y);
             const bbw = unitToScreen(this.boundingBox.w);
             const bbh = unitToScreen(this.boundingBox.h);
+            
             ctx.save();
             ctx.textAlign = "left";
             ctx.textBaseline = "alphabetic";
@@ -201,14 +203,14 @@ const KNOB_EMA = 0.5;
 const SLIDER_EMA = 0.5;
 
 class Button {
-    constructor(markerData, inputData) {
+    constructor(markerData, inputData, p) {
         this.name = inputData.name;
         this.type = inputData.type;
         this.actor = markerData[inputData.actorID];
         this.val = 0;
         this.relativePosition = {
             distance: inputData.relativePosition.distance,
-            angle: inputData.relativePosition.angle - CORNER_ANGLE,
+            angle: inputData.relativePosition.angle,
         }
         this.actor.timeout = inputData.detectWindow;
         this.actor.inuse = true;
@@ -230,14 +232,14 @@ class Button {
 }
 
 class Toggle {
-    constructor(markerData, inputData) {
+    constructor(markerData, inputData, p) {
         this.name = inputData.name;
         this.type = inputData.type;
         this.actor = markerData[inputData.actorID];
         this.val = 0;
         this.relativePosition = {
             distance: inputData.relativePosition.distance,
-            angle: inputData.relativePosition.angle - CORNER_ANGLE,
+            angle: inputData.relativePosition.angle,
         }
         this.actor.timeout = inputData.detectWindow;
         this.actor.inuse = true;
@@ -260,14 +262,14 @@ class Toggle {
 }
 
 class Knob {
-    constructor(markerData, inputData) {
+    constructor(markerData, inputData, p) {
         this.name = inputData.name;
         this.type = inputData.type;
         this.actor = markerData[inputData.actorID];
         this.val = 0;
         this.relativePosition = {
             distance: inputData.relativePosition.distance,
-            angle: inputData.relativePosition.angle - CORNER_ANGLE,
+            angle: inputData.relativePosition.angle,
         }
         this.actor.timeout = inputData.detectWindow;
         this.actor.inuse = true;
@@ -295,22 +297,22 @@ class Knob {
 }
 
 class Slider {
-    constructor(markerData, inputData) {
+    constructor(markerData, inputData, p) {
         this.name = inputData.name;
         this.type = inputData.type;
         this.actor = markerData[inputData.actorID];
         this.val = 0;
         this.relativePosition = {
             distance: inputData.relativePosition.distance,
-            angle: inputData.relativePosition.angle - CORNER_ANGLE,
+            angle: inputData.relativePosition.angle,
         }
         this.start = {
             distance: inputData.relativePosition.distance,
-            angle: inputData.relativePosition.angle - CORNER_ANGLE,
+            angle: inputData.relativePosition.angle,
         }
         this.end = {
             distance: inputData.endPosition.distance,
-            angle: inputData.endPosition.angle - CORNER_ANGLE,
+            angle: inputData.endPosition.angle,
         }
         this.trackLength = vecMag(
             vecSub(
@@ -324,7 +326,7 @@ class Slider {
 
     update(parent) {
         if (this.actor.present) {
-            const as = vecRot(vecScale(yaxis, this.start.distance), this.start.angle + parent.angle);
+            const as = vecRot(vecScale(yaxis, this.start.distance), -this.start.angle + parent.angle - parent.cornerAngleInput);
             const aa = vecSub(parent.anchor.center, this.actor.center);
             // debugVec(
             //     mapToScreen(parent.anchor.center),
