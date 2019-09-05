@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Mechamarkers</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        overflow: hidden;
+        font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+      }
+
+      canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: black;
+        box-sizing: border-box;
+        border: 2px dashed rgba(255, 255, 255, 1.0);
+      }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+    <script src="../quadmap/config.js"></script>
+    <script src="../quadmap/index.js"></script>
+    <script src="../markerconfig.js"></script>
+    <script src="../screenconfig.js"></script>
+    <script src="./tablevisualization.js"></script>
+    <script src="./tableinput.js"></script>
+  </head>
+
+  <body>
+    <canvas id="vis">
+
+    </canvas>
+  </body>
+</html>
