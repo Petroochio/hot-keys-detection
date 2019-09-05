@@ -11,7 +11,7 @@ export function createButtonState(inputID) {
   }
 }
 
-export function Button(inputID, groupID, inputState, toolState, setInputState) {
+export function Button(inputID, groupID, inputState, toolState, setInputState, removeInput) {
   const { actorID } = inputState;
 
   const selectType = ({ target }) => {
@@ -23,7 +23,7 @@ export function Button(inputID, groupID, inputState, toolState, setInputState) {
       { on: { change: selectType } },
       [
         h('option', { props: { value: 'NONE', disabled: true, } }, 'Select Input Type'),
-        h('option', { props: { value: 'BUTTON' } }, 'Button'),
+        h('option', { props: { selected: true, value: 'BUTTON' } }, 'Button'),
         h('option', { props: { value: 'TOGGLE' } }, 'Toggle'),
         h('option', { props: { value: 'KNOB' } }, 'Knob'),
         h('option', { props: { value: 'SLIDER' } }, 'Slider'),
@@ -96,5 +96,8 @@ export function Button(inputID, groupID, inputState, toolState, setInputState) {
     ]
   );
 
-  return h('ul.input-element', [inputTypeName, actor, detectWindow, relativePosition]);
+  const bulletElement = h('span.bullet', '');
+  const removeInputButton = h('button.remove-input', { on: { click: () => removeInput(inputID) } }, 'remove input');
+
+  return h('ul.input-element', [inputTypeName, actor, detectWindow, relativePosition, bulletElement, removeInputButton]);
 }

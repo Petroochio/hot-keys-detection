@@ -16,6 +16,10 @@ export default {
     state.push(newGroup);
     propogate();
   },
+  removeGroup: (id) => {
+    state.splice(id, 1);
+    propogate();
+  },
   forceUpdate: () => {
     propogate();
   },

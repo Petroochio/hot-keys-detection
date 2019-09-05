@@ -11,7 +11,7 @@ export function createToggleState(inputID) {
   }
 }
 
-export function Toggle(inputID, groupID, inputState, toolState, setInputState) {
+export function Toggle(inputID, groupID, inputState, toolState, setInputState, removeInput) {
   const { actorID } = inputState;
 
   const selectType = ({ target }) => {
@@ -96,5 +96,8 @@ export function Toggle(inputID, groupID, inputState, toolState, setInputState) {
     ]
   );
 
-  return h('ul.input-element', [inputTypeName, actor, detectWindow, relativePosition]);
+  const bulletElement = h('span.bullet', '');
+  const removeInputButton = h('button.remove-input', { on: { click: () => removeInput(inputID) } }, 'remove input');
+
+  return h('ul.input-element', [inputTypeName, actor, detectWindow, relativePosition, bulletElement, removeInputButton]);
 }

@@ -5,6 +5,7 @@ import { Toggle } from './Toggle';
 import { Knob } from './Knob';
 import { Slider } from './Slider';
 import ToolStore from '../DataStore/Tools';
+import InputGroupStore from '../DataStore/InputGroups'
 
 export function createGroupState(groupID) {
   return {
@@ -95,6 +96,11 @@ export function InputGroup(groupID, groupState, toolState, setGroupState) {
     ]
   );
 
+  const removeInput = (inputID) => {
+    groupState.inputs.splice(inputID, 1);
+    setGroupState(groupID, groupState);
+  }
+
   // Inputs
   const setInputState = (id, newState) => {
     groupState.inputs[id] = newState;
@@ -104,15 +110,15 @@ export function InputGroup(groupID, groupState, toolState, setGroupState) {
     .map((a, i) => {
       switch (a.type) {
         case 'BUTTON':
-          return Button(i, groupID, a, toolState, setInputState);
+          return Button(i, groupID, a, toolState, setInputState, removeInput);
         case 'TOGGLE':
-          return Toggle(i, groupID, a, toolState, setInputState);
+          return Toggle(i, groupID, a, toolState, setInputState, removeInput);
         case 'KNOB':
-          return Knob(i, groupID, a, toolState, setInputState);
+          return Knob(i, groupID, a, toolState, setInputState, removeInput);
         case 'SLIDER':
-          return Slider(i, groupID, a, toolState, setInputState);
+          return Slider(i, groupID, a, toolState, setInputState, removeInput);
         default:
-          return GenericInput(i, groupID, a, toolState, setInputState);
+          return GenericInput(i, groupID, a, toolState, setInputState, removeInput);
       }
     });
 
@@ -122,7 +128,8 @@ export function InputGroup(groupID, groupState, toolState, setGroupState) {
   }
   const bulletElement = h('span.bullet', '');
   const addInputButton = h('button.add-input', { on: { click: addInput } }, 'add input');
-  const actorParent = h('li.parameter.input-object', [...inputs, bulletElement, addInputButton]);
+  const removeGroupButton = h('button.remove-group', { on: { click: () => InputGroupStore.removeGroup(groupID) } }, 'remove group');
+  const actorParent = h('li.parameter.input-object', [...inputs, bulletElement, addInputButton, removeGroupButton]);
 
   // Whole assembly
   return h('ul.input-group-list', [name, anchor, markerSize, detectWindow, actorParent]);

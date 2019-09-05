@@ -12,7 +12,7 @@ export function createSliderState(inputID) {
   }
 }
 
-export function Slider(inputID, groupID, inputState, toolState, setInputState) {
+export function Slider(inputID, groupID, inputState, toolState, setInputState, removeInput) {
   const { actorID } = inputState;
 
   const selectType = ({ target }) => {
@@ -27,7 +27,7 @@ export function Slider(inputID, groupID, inputState, toolState, setInputState) {
         h('option', { props: { value: 'BUTTON' } }, 'Button'),
         h('option', { props: { value: 'TOGGLE' } }, 'Toggle'),
         h('option', { props: { value: 'KNOB' } }, 'Knob'),
-        h('option', { props: { value: 'SLIDER' } }, 'Slider'),
+        h('option', { props: { selected: true, value: 'SLIDER' } }, 'Slider'),
       ]
   ));
 
@@ -112,5 +112,8 @@ export function Slider(inputID, groupID, inputState, toolState, setInputState) {
     ]
   );
 
-  return h('ul.input-element', [inputTypeName, actor, detectWindow, relativePosition, endPosition]);
+  const bulletElement = h('span.bullet', '');
+  const removeInputButton = h('button.remove-input', { on: { click: () => removeInput(inputID) } }, 'remove input');
+
+  return h('ul.input-element', [inputTypeName, actor, detectWindow, relativePosition, endPosition, bulletElement, removeInputButton]);
 }

@@ -12,7 +12,7 @@ export function createGenericState(inputID) {
   }
 }
 
-export function GenericInput(inputID, groupID, inputState, toolState, setInputState) {
+export function GenericInput(inputID, groupID, inputState, toolState, setInputState, removeInput) {
   const selectType = ({ target }) => {
     let newState;
     switch (target.value) {
@@ -59,5 +59,8 @@ export function GenericInput(inputID, groupID, inputState, toolState, setInputSt
   );
   const inputTypeName = h('li.parameter.input.param-input-type', [typeSelect, nameField]);
 
-  return h('ul.input-element', [inputTypeName]);
+  const bulletElement = h('span.bullet', '');
+  const removeInputButton = h('button.remove-input', { on: { click: () => removeInput(inputID) } }, 'remove input');
+
+  return h('ul.input-element', [inputTypeName, bulletElement, removeInputButton]);
 }
