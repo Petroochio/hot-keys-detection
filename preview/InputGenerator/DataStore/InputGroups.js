@@ -24,6 +24,7 @@ export default {
     propogate();
   },
   loadConfig: (config) => {
+    state = [];
     config.forEach(ig => state.push(ig));
     propogate();
   },
