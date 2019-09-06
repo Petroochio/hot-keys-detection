@@ -88,9 +88,10 @@ class DrawTarget {
   }
 
   updateStyle() {
+
     this.element.style.left = this.position.x + 'px';
     this.element.style.top = this.position.y + 'px';
-
+    
     this.element.style.width = this.size.x + 'px';
     this.element.style.height = this.size.y + 'px';
     let canvas = this.element.querySelector('canvas');

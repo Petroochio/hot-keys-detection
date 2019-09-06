@@ -236,6 +236,8 @@ export class Panel3 {
       this.gearVal = s1;
       this.toggleVal = t1;
 
+      console.log(this.gearVal, s1);
+
       this.toggle = this.toggleVal > 0.5 ? false : true;
 
       if (this.gearVal < 0.1) {
