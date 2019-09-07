@@ -105,4 +105,9 @@ export function init(sock) {
     const loadedConfig = JSON.parse(config);
     InputGroupStore.loadConfig(loadedConfig.groups);
   });
+
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey && e.key == 'z') InputGroupStore.undo();
+    if (e.ctrlKey && e.key == 'y') InputGroupStore.redo();
+  });
 }

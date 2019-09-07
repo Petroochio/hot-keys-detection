@@ -1,5 +1,7 @@
 import h from 'snabbdom/h';
 import ToolStore from '../DataStore/Tools';
+// Undo is annoying bc our data is not immutable and this is hacky
+import InputGroupStore from '../DataStore/InputGroups'
 
 export function createSliderState(inputID) {
   return {
@@ -16,8 +18,9 @@ export function Slider(inputID, groupID, inputState, toolState, setInputState, r
   const { actorID } = inputState;
 
   const selectType = ({ target }) => {
+    InputGroupStore.storeState();
     inputState.type = target.value;
-    setInputState(inputID, inputState);
+    InputGroupStore.forceUpdate();
   };
   const typeSelect = h('span.param-value',
     h('select',
@@ -33,8 +36,9 @@ export function Slider(inputID, groupID, inputState, toolState, setInputState, r
 
   // Input type and name
   const setName = ({ target }) => {
+    InputGroupStore.storeState();
     inputState.name = target.value;
-    setInputState(inputID, inputState);
+    InputGroupStore.forceUpdate();
   };
   const nameField = h('span.param-value.input-name',
     h('input', { on: { change: setName }, props: { value: inputState.name } })
@@ -63,8 +67,9 @@ export function Slider(inputID, groupID, inputState, toolState, setInputState, r
 
   // Detect window
   const setDetectWindow = (e) => {
+    InputGroupStore.storeState();
     inputState.detectWindow = e.target.value;
-    setInputState(inputID, inputState);
+    InputGroupStore.forceUpdate();
   };
   const detectWindow = h(
     'li.parameter.input-group.param-anchor-dw',

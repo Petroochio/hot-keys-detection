@@ -21,8 +21,9 @@ export function createGroupState(groupID) {
 export function InputGroup(groupID, groupState, toolState, setGroupState) {
   // Name
   const setName = (e) => {
+    InputGroupStore.storeState();
     groupState.name = e.target.value;
-    setGroupState(groupID, groupState);
+    InputGroupStore.forceUpdate();
   };
   const name = h(
     'li.parameter.input-group.param-name.input-group-name',
@@ -40,8 +41,9 @@ export function InputGroup(groupID, groupState, toolState, setGroupState) {
   );
 
   const setMarkerSize = (e) => {
+    InputGroupStore.storeState();
     groupState.markerSize = e.target.value;
-    setGroupState(groupID, groupState);
+    InputGroupStore.forceUpdate();
   };
   const markerSize = h(
     'li.parameter.input-group.marker-size',
@@ -76,8 +78,9 @@ export function InputGroup(groupID, groupState, toolState, setGroupState) {
 
   // Detect window
   const setDetectWindow = (e) => {
+    InputGroupStore.storeState();
     groupState.detectWindow = e.target.value;
-    setGroupState(groupID, groupState);
+    InputGroupStore.forceUpdate();
   };
   const detectWindow = h(
     'li.parameter.input-group.param-anchor-dw',
@@ -97,14 +100,16 @@ export function InputGroup(groupID, groupState, toolState, setGroupState) {
   );
 
   const removeInput = (inputID) => {
+    InputGroupStore.storeState();
     groupState.inputs.splice(inputID, 1);
-    setGroupState(groupID, groupState);
+    InputGroupStore.forceUpdate();
   }
 
   // Inputs
   const setInputState = (id, newState) => {
+    InputGroupStore.storeState();
     groupState.inputs[id] = newState;
-    setGroupState(groupID, groupState);
+    InputGroupStore.forceUpdate();
   };
   const inputs = groupState.inputs
     .map((a, i) => {
@@ -123,8 +128,9 @@ export function InputGroup(groupID, groupState, toolState, setGroupState) {
     });
 
   const addInput = () => {
+    InputGroupStore.storeState();
     groupState.inputs.push(createGenericState(groupState.inputs.length));
-    setGroupState(groupID, groupState);
+    InputGroupStore.forceUpdate();
   }
   const bulletElement = h('span.bullet', '');
   const addInputButton = h('button.add-input', { on: { click: addInput } }, 'add input');

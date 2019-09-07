@@ -5,6 +5,9 @@ import { createToggleState } from './Toggle';
 import { createKnobState } from './Knob';
 import { createSliderState } from './Slider';
 
+// Undo is annoying bc our data is not immutable and this is hacky
+import InputGroupStore from '../DataStore/InputGroups'
+
 export function createGenericState(inputID) {
   return {
     name: `Input ${inputID}`,
@@ -51,8 +54,9 @@ export function GenericInput(inputID, groupID, inputState, toolState, setInputSt
   ));
 
   const setName = ({ target }) => {
+    InputGroupStore.storeState();
     inputState.name = target.value;
-    setInputState(inputID, inputState);
+    InputGroupStore.forceUpdate();
   };
   const nameField = h('span.param-value.input-name',
     h('input', { on: { change: setName }, props: { value: inputState.name } })
