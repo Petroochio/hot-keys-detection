@@ -7,13 +7,16 @@ import { Slider } from './Slider';
 import ToolStore from '../DataStore/Tools';
 import InputGroupStore from '../DataStore/InputGroups'
 
+let defaultMarkerSize = 20;
+let wasMarkerSizeChanged = false;
+
 export function createGroupState(groupID) {
   return {
     name: `input_group_${groupID}`,
     anchorID: '',
     detectWindow: 250,
     inputs: [],
-    markerSize: 20,
+    markerSize: defaultMarkerSize,
   }
 }
 
@@ -41,6 +44,10 @@ export function InputGroup(groupID, groupState, toolState, setGroupState) {
   );
 
   const setMarkerSize = (e) => {
+    if (!wasMarkerSizeChanged) {
+      defaultMarkerSize = e.target.value
+      wasMarkerSizeChanged = true;
+    }
     InputGroupStore.storeState();
     groupState.markerSize = e.target.value;
     InputGroupStore.forceUpdate();
