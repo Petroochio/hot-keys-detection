@@ -23,7 +23,7 @@ function init() {
 
   app.markerImage = document.querySelector('#marker-image');
 
-  const socket = io('http://localhost:5000');
+  const socket =  ('http://localhost:5000');
   app.socket = socket;
   initMarkers();
 

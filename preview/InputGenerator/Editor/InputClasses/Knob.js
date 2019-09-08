@@ -1,4 +1,4 @@
-import { calEMA } from '../../Utils/General';
+import { angleEMA } from '../../Utils/General';
 import { vecSub, vecRot, vecScale, vecAngleBetween } from '../../Utils/Vec2';
 import { matrixTransform } from '../../Utils/Distortion';
 
@@ -27,7 +27,7 @@ class Knob {
       const anchorVec = vecSub(quad2Rect(parent.anchor.center), quad2Rect(parent.anchor.corner));
       const actorVec = vecSub(quad2Rect(this.actor.center), quad2Rect(this.actor.corner));
       const angleBetween = -vecAngleBetween(anchorVec, actorVec);
-      this.val = calEMA(angleBetween, this.val, 1.0);
+      this.val = angleEMA(angleBetween, this.val, 0.5);
     }
   }
 

@@ -1,81 +1,3 @@
-const inputGroup0 = {
-    name: 'input group knob',
-    anchorID: 3,
-    detectWindow: 250,
-    inputs: [
-        {
-            name: 'Knob',
-            type: 'KNOB',
-            actorID: 2,
-            detectWindow: 250,
-            relativePosition: {
-                distance: 34,
-                angle: Math.PI * 1.75
-            },
-        },
-    ],
-}
-
-const inputGroup1 = {
-    name: 'input group button',
-    anchorID: 8,
-    detectWindow: 250,
-    inputs: [
-        {
-            name: 'Button',
-            type: 'BUTTON',
-            actorID: 7,
-            detectWindow: 75,
-            relativePosition: {
-                distance: 28,
-                angle: Math.PI * -1.25
-            },
-        },
-    ],
-}
-
-const inputGroup2 = {
-    name: 'input group toggle',
-    anchorID: 6,
-    detectWindow: 250,
-    inputs: [
-        {
-            name: 'Toggle',
-            type: 'TOGGLE',
-            actorID: 5,
-            detectWindow: 150,
-            relativePosition: {
-                distance: 29,
-                angle: -1.74
-            },
-        },
-    ],
-}
-
-const inputGroup3 = {
-    name: 'input group slider',
-    anchorID: 0,
-    detectWindow: 250,
-    inputs: [
-        {
-            name: 'Slider',
-            type: 'SLIDER',
-            actorID: 1,
-            detectWindow: 250,
-            relativePosition: {
-                distance: 24,
-                angle: Math.PI/4
-            },
-            endPosition: {
-                distance: 79,
-                angle: Math.PI/4
-            },
-        },
-    ],
-}
-
-const dummyInputData = [inputGroup0, inputGroup1, inputGroup2, inputGroup3];
-
 let inputGroupData = [];
 
 function initTableInput(inputArr) {
@@ -218,7 +140,7 @@ class Button {
 
     update(parent) {
         const v = this.actor.present ? 1 : 0;
-        this.val = calEMA(v, this.val, BUTTON_EMA);
+        this.val = calEMA(this.val, v, BUTTON_EMA);
     }
 
     display(x, y, w, h) {
@@ -247,7 +169,7 @@ class Toggle {
 
     update(parent) {
         const v = this.actor.present ? 1 : 0;
-        this.val = calEMA(v, this.val, TOGGLE_EMA);
+        this.val = calEMA(this.val, v, TOGGLE_EMA);
     }
 
     display(x, y, w, h) {
@@ -280,7 +202,7 @@ class Knob {
             const anchorVec = vecSub(parent.anchor.center, parent.anchor.corner);
             const actorVec = vecSub(this.actor.center, this.actor.corner);
             const angleBetween = -vecAngleBetween(anchorVec, actorVec);
-            this.val = calEMA(angleBetween, this.val, KNOB_EMA);
+            this.val = angleEMA(angleBetween, this.val, KNOB_EMA);
         }
     }
 
@@ -328,15 +250,15 @@ class Slider {
         if (this.actor.present) {
             const as = vecRot(vecScale(yaxis, this.start.distance), -this.start.angle + parent.angle - parent.cornerAngleInput);
             const aa = vecSub(parent.anchor.center, this.actor.center);
-            // debugVec(
-            //     mapToScreen(parent.anchor.center),
-            //     mapToScreen(vecAdd(parent.anchor.center, as)),
-            //     'red'
-            //     );
+            debugVec(
+                mapToScreen(parent.anchor.center),
+                mapToScreen(vecAdd(parent.anchor.center, as)),
+                'red'
+                );
             const len = vecMag(vecSub(as, aa));
             let v = len / this.trackLength;
             v = v > 1 ? 1 : v < 0 ? 0 : v; // constraining v between 0 to 1
-            this.val = calEMA(v, this.val, SLIDER_EMA);
+            this.val = calEMA(this.val, v, SLIDER_EMA);
         }
     }
     
@@ -349,3 +271,13 @@ class Slider {
 }
 
 const calEMA = (newVal, oldVal, EMA) => ((newVal * EMA) + (oldVal * (1 - EMA)));
+
+const angleEMA = (newAngle, oldAngle, EMA) => {
+    const nx = Math.cos(newAngle);
+    const ny = Math.sin(newAngle);
+    const ox = Math.cos(oldAngle);
+    const oy = Math.sin(oldAngle);
+    const x = (nx * EMA) + (ox * (1 - EMA));
+    const y = (ny * EMA) + (oy * (1 - EMA));
+    return Math.atan2(y, x);
+}

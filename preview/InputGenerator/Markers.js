@@ -4,8 +4,8 @@ const MARKER_COUNT = 100;
 const MARKER_TIMEOUT = 300;
 const CENTER_SMOOTH_THRESHOLD = 1;
 const CORNER_SMOOTH_THRESHOLD = 3;
-const SMOOTH_HEAVY = 0.2; // 0-1, lower the value to get more smoothing
-const SMOOTH_LIGHT = 0.75;
+const SMOOTH_HEAVY = 0.3; // 0-1, lower the value to get more smoothing
+const SMOOTH_LIGHT = 0.8;
 
 let ctx; // lazy fix
 
@@ -20,7 +20,7 @@ class Marker {
       this.corner = {x:0, y:0};
       this.allCorners = [{ x:0, y:0 }, { x:0, y:0 }, { x:0, y:0 }, { x:0, y:0 }];
       this.centerSmoothThreshold = 1;
-      this.cornerSmoothThreshold = 3;
+      this.cornerSmoothThreshold = 2;
       this.shouldFill = false;
       this.type = ''; // ANCHOR or ACTOR
       this.groupID = -1; // -1 is unset

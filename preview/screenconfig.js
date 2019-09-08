@@ -9,15 +9,15 @@ const SCREEN = {
 
 
 function mapToScreen(pt) {
-    if (pt.x >= SCREEN.rx && pt.x <= SCREEN.rx + SCREEN.rw && pt.y >= SCREEN.ry && pt.y <= SCREEN.ry + SCREEN.rh) {
-        var px = pt.x - SCREEN.rx;
-        var py = pt.y - SCREEN.ry;
-        px = (px / SCREEN.rw) * SCREEN.w;
-        py = (py / SCREEN.rh) * SCREEN.h;
-        return {x:px, y:py};
-    }
-    // Don't return undefined
-    return { x: 0, y: 0};
+    // if (pt.x >= SCREEN.rx && pt.x <= SCREEN.rx + SCREEN.rw && pt.y >= SCREEN.ry && pt.y <= SCREEN.ry + SCREEN.rh) {
+    //     var px = pt.x - SCREEN.rx;
+    //     var py = pt.y - SCREEN.ry;
+    //     px = (px / SCREEN.rw) * SCREEN.w;
+    //     py = (py / SCREEN.rh) * SCREEN.h;
+    //     return {x:px, y:py};
+    // }
+
+    return pt;
 }
 
 function unitToScreen(val) {

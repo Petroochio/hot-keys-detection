@@ -130,7 +130,7 @@ function mapUVtoCellCoord(pt) {
   const cell = CELLS_SIMPLE[pt.uvindex];
 
   return {
-    x: cell.corner.x + (pt.uv.u * cell.w),
-    y: cell.corner.y + (pt.uv.v * cell.h),
+    x: (cell.corner.x + (pt.uv.u * cell.w)) * window.innerWidth,
+    y: (cell.corner.y + (pt.uv.v * cell.h)) * window.innerHeight,
   };
 }

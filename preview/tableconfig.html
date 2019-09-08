@@ -146,7 +146,6 @@
       }
 
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
   </head>
 
   <body>
@@ -175,26 +174,6 @@
 
         <div class="line rightAlign">
             Y number of cells: <input id="yCount" type="number" value="6" min="1" step="1"/>
-        </div>
-
-        <div class="line rightAlign">
-            <b>Real world measurements</b>
-        </div>
-
-        <div class="line rightAlign">
-            X cell width (mm): <input id="xWidth" type="number" value="90" min="0" step="0.1"/>
-        </div>
-
-        <div class="line rightAlign">
-            Y cell height (mm): <input id="yHeight" type="number" value="110" min="0" step="0.1"/>
-        </div>
-
-        <div class="line rightAlign">
-            left edge to left-most cell edge (mm): <input id="xOffset" type="number" value="12" min="0" step="0.1"/>
-        </div>
-
-        <div class="line rightAlign">
-            top edge to top-most cell edge (mm): <input id="yOffset" type="number" value="12" min="0" step="0.1"/>
         </div>
 
         <div class="line rightAlign">
@@ -243,7 +222,6 @@
                 <li>Generate calibration file
                     <ul>
                         <li>Paste quads text into QUADS_CALIBRATION variable in config.js</li>
-                        <li>Paste cells text into CELLS_CALIBRATION variable in config.js</li>
                     </ul>
                 </li>
                 <li>You can also apply an existing QUADS_CALIBRATION to the points</li>
@@ -490,10 +468,10 @@
                 var quadArr = [];
                 var cellArr = [];
                 var cellArrTemp = [];
-                var cellX = parseFloat(document.getElementById('xOffset').value);
-                var cellY = parseFloat(document.getElementById('yOffset').value);
-                var cellW = parseFloat(document.getElementById('xWidth').value);
-                var cellH = parseFloat(document.getElementById('yHeight').value);
+                var cellX = 0;
+                var cellY = 0;
+                var cellW = 1/gridX;
+                var cellH = 1/gridY;
                 for (var i=0; i<=gridX; i++) {
                     quadArr.push([]);
                     cellArr.push([]);
@@ -528,16 +506,9 @@
                 }
                 var time = Date.now();
                 var quadArrString = JSON.stringify(quadArr);
+                download(quadArrString, 'quads'+time, 'txt');
                 var cellArrString = JSON.stringify(cellArrTemp);
-                socket.emit(
-                    'set uv config',
-                    {
-                        config: {
-                            cells: cellArrString,
-                            quads: quadArrString,
-                        }
-                    });
-
+                download(cellArrString, 'cells'+time, 'txt');
                 updateWarning('Calibration files downloaded', true);
             } else {
                 updateWarning('No calibration image loaded', true);
@@ -583,7 +554,7 @@
         }
 
 
-        let c, ctx, socket;
+        var c, ctx;
         window.onload = function() {
             document.getElementById('loadImage').addEventListener('change', handleFiles, false);
             document.getElementById('buttonZoomIn').addEventListener('click', zoomIn);
@@ -603,18 +574,12 @@
             c = document.getElementById('canvas');
             ctx = c.getContext('2d');
             ctx.translate(0.5, 0.5);
-
-            socket = io('localhost:5000');
-            socket.on('send uv config', console.log);
         };
 
         window.onresize = resizeGrid;
 
         window.onkeydown = function(e) {
             switch(e.key) {
-                case 's':
-                    socket.emit('get uv config');
-                    break;
                 case 'ArrowLeft': //left
                     e.preventDefault();
                     arrowPressed(-1, 0);
@@ -644,6 +609,7 @@
                     break;
             }
         }
+
     </script>
   </body>
 </html>

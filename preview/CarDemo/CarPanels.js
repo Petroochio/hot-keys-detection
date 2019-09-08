@@ -12,18 +12,23 @@ export class Dial {
   update(v) {
     this.val = v;
 
-    if (this.val < -Math.PI*0.5 && this.pval > Math.PI*0.5) {
-      this.d = ((Math.PI + this.val) + (Math.PI - this.pval));
-    } else if (this.val > Math.PI*0.5 && this.pval < -Math.PI*0.5) {
-      this.d = -((Math.PI - this.val) + (Math.PI + this.pval));
-    } else {
-      this.d = this.val - this.pval;
-    }
+    // if (this.val < -Math.PI*0.5 && this.pval > Math.PI*0.5) {
+    //   this.d = ((Math.PI + this.val) + (Math.PI - this.pval));
+    // } else if (this.val > Math.PI*0.5 && this.pval < -Math.PI*0.5) {
+    //   this.d = -((Math.PI - this.val) + (Math.PI + this.pval));
+    // } else {
+    //   this.d = this.val - this.pval;
+    // }
+
+    const nx = Math.cos(this.val);
+    const ny = Math.sin(this.val);
+    const ox = Math.cos(this.pval);
+    const oy = Math.sin(this.pval);
+    this.d = -Math.atan2(nx*oy-ny*ox, nx*ox+ny*oy);
 
     const timenow = Date.now();
 
     if (Math.abs(this.d) > this.delta && timenow - this.timestamp > this.debounce) {
-      console.log(this.d);
       this.dir = this.d > 0 ? 1 : -1;
       this.pval = this.val;
       this.timestamp = Date.now();
