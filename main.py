@@ -21,7 +21,7 @@ camID = 0
 camData = None
 
 # set aruco dictionary
-dictionary_name = aruco.DICT_4X4_50
+dictionary_name = aruco.DICT_4X4_100
 dictionary = aruco.getPredefinedDictionary(dictionary_name)
 
 cameraParameters = aruco.DetectorParameters_create()

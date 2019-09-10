@@ -1,5 +1,3 @@
-let inputGroupData = [];
-
 function initTableInput(inputArr) {
     inputGroupData = inputArr.groups.map((i) => (new TableInputGroup(markerData, i)));
     inputGroupData.forEach((i) => i.calBoundingBox(30));
