@@ -60,8 +60,8 @@ export class PushButton {
 export class Panel1 {
   constructor(b1, k1, k2) {
     this.pushbutton = new PushButton(b1, 0.5);
-    this.dial1 = new Dial(k1, 0.3, 400); // old thres = 0.7
-    this.dial2 = new Dial(k2, 0.3, 400);
+    this.dial1 = new Dial(k1, 0.4, 400); // old thres = 0.7
+    this.dial2 = new Dial(k2, 0.4, 400);
 
     this.power = true;
 
