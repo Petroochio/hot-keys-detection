@@ -50,7 +50,7 @@ class Slider {
         let temppos = vecRot(matrixTransform(parent.matrixQuad2Rect, rwpos), Math.PI);
         temppos = vecScale(temppos, ratio);
         
-        this.pos = this.actor.noSmooth ? temppos : vecEMA(this.pos, temppos, 0.8);
+        this.pos = this.actor.noSmooth ? temppos : vecEMA(this.pos, temppos, 0.7);
         if (this.actor.noSmooth) this.actor.noSmooth = false;
 
         const as = vecRot(vecScale(xaxis, this.start.distance), this.start.angle - parent.cornerAngleInput);
