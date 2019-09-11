@@ -94,7 +94,9 @@ class InputGroup {
   update() {
     if (!this.anchor) return;
     this.angle = -vecAngleBetween(vecSub(this.anchor.center, this.anchor.corner), angleRefAxis) - this.cornerAngleGroup;
-    this.pos = vecEMA(this.anchor.center, this.pos, 0.5);
+    this.pos = this.anchor.noSmooth ? this.anchor.center : vecEMA(this.anchor.center, this.pos, 0.5);
+    if (this.anchor.noSmooth) this.anchor.noSmooth = false;
+    
     if (this.anchor.present) {
       this.matrixRect2Quad = calDistortionMatrices(
         this.anchor.allCorners[0], this.anchor.allCorners[1], this.anchor.allCorners[2], this.anchor.allCorners[3],

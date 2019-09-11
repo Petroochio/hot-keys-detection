@@ -14,6 +14,7 @@ class Marker {
       this.id = id;
       this.inuse = false;
       this.present = false;
+      this.noSmooth = false;
       this.timestamp = 0;
       this.timeout = MARKER_TIMEOUT;
       this.center = {x:0, y:0};
@@ -28,12 +29,13 @@ class Marker {
     }
 
     update(marker, timenow) {
+        this.timestamp = timenow;
         if (this.present) {
             const centerDelta = Vec2.vecMag(Vec2.vecSub(this.center, marker.center));
             const cornerDelta = Vec2.vecMag(Vec2.vecSub(this.corner, marker.corner));
             const centerSmooth = centerDelta > this.centerSmoothThreshold ? SMOOTH_LIGHT : SMOOTH_HEAVY;
             const cornerSmooth = cornerDelta > this.cornerSmoothThreshold ? SMOOTH_LIGHT : SMOOTH_HEAVY;
-            this.timestamp = timenow;
+
             this.center = Vec2.vecEMA(this.center, marker.center, centerSmooth);
             this.corner = Vec2.vecEMA(this.corner, marker.corner, cornerSmooth);
 
@@ -44,12 +46,15 @@ class Marker {
               c.x = newC.x;
               c.y = newC.y;
             });
+
+            // this.allCorners = marker.allCorners.map(c => (c));
+
         } else {
             this.present = true;
-            this.timestamp = timenow;
+            this.noSmooth = true;
             this.center = marker.center;
             this.corner = marker.corner;
-            this.allCorners = marker.allCorners;
+            this.allCorners = marker.allCorners.map(c => (c));
         }
     }
 

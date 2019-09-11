@@ -56,6 +56,8 @@ function stateListener() {
   });
 }
 
+let relativePositionCounter = 0;
+let relativePositionArr = [];
 export function update(timenow) {
   ctx.clearRect(-10, -10, canvas.width + 10, canvas.height + 10);
   ctx.fillStyle = '#000000';
@@ -75,10 +77,29 @@ export function update(timenow) {
 
       if (anchor.present && actor.present) {
         if (checkPerspective(anchor, actor, 0.01, 0.0002)) {
-          const relPos = relativePosition(anchor, actor, inputGroupState[group].markerSize);
-          ToolStore.setProp('toolMode', 'NONE');
-          inputGroupState[group].inputs[input].relativePosition = relPos;
-          InputGroupStore.forceUpdate();
+          
+          relativePositionArr.push(relativePosition(anchor, actor, inputGroupState[group].markerSize));
+          relativePositionCounter++;
+
+          if (relativePositionCounter > 30) {
+            let d = 0, a = 0;
+            relativePositionArr.forEach(p => {
+              d = d + p.distance;
+              a = a + p.angle;
+            });
+            
+            d = d / relativePositionArr.length;
+            a = a / relativePositionArr.length;
+            
+            const relPos = {distance: d, angle: a};
+            
+            inputGroupState[group].inputs[input].relativePosition = relPos;
+            InputGroupStore.forceUpdate();
+
+            ToolStore.setProp('toolMode', 'NONE');
+            relativePositionCounter = 0;
+            relativePositionArr = [];
+          }
         }
       }
       break;
@@ -88,10 +109,29 @@ export function update(timenow) {
 
       if (anchor.present && actor.present) {
         if (checkPerspective(anchor, actor, 0.01, 0.0002)) {
-          const endPos = relativePosition(anchor, actor, inputGroupState[group].markerSize);
-          ToolStore.setProp('toolMode', 'NONE');
-          inputGroupState[group].inputs[input].endPosition = endPos;
-          InputGroupStore.forceUpdate();
+          
+          relativePositionArr.push(relativePosition(anchor, actor, inputGroupState[group].markerSize));
+          relativePositionCounter++;
+
+          if (relativePositionCounter > 30) {
+            let d = 0, a = 0;
+            relativePositionArr.forEach(p => {
+              d = d + p.distance;
+              a = a + p.angle;
+            });
+            
+            d = d / relativePositionArr.length;
+            a = a / relativePositionArr.length;
+            
+            const endPos = {distance: d, angle: a};
+            
+            inputGroupState[group].inputs[input].endPosition = endPos;
+            InputGroupStore.forceUpdate();
+
+            ToolStore.setProp('toolMode', 'NONE');
+            relativePositionCounter = 0;
+            relativePositionArr = [];
+          }
         }
       }
       break;

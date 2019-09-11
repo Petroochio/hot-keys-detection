@@ -1,6 +1,7 @@
 import { calEMA } from '../../Utils/General';
 import { vecSub, vecMag, vecRot, vecScale, vecEMA, lineCP, vecUnit } from '../../Utils/Vec2';
 import { matrixTransform } from '../../Utils/Distortion';
+import { relativePositionVec } from '../RelativePos';
 
 const xaxis = {x:1, y:0};
 const yaxis = {x:0, y:1};
@@ -42,9 +43,13 @@ class Slider {
   update(parent) {
     if(!this.actor) return;
     if (this.actor.present) {
+
+        const dualPos = relativePositionVec(parent.anchor, this.actor, parent.markerSize);
+        const ratio = ((vecMag(dualPos.anchorToActor) + vecMag(dualPos.actorToAnchor))/2) / vecMag(dualPos.anchorToActor);
         const rwpos = this.actor.center;
-        this.temppos = vecRot(matrixTransform(parent.matrixQuad2Rect, rwpos), Math.PI);
-        this.pos = vecEMA(this.pos, this.temppos, 0.5);
+        let temppos = vecRot(matrixTransform(parent.matrixQuad2Rect, rwpos), Math.PI);
+        temppos = vecScale(temppos, ratio);
+        this.pos = this.actor.noSmooth ? temppos : vecEMA(this.pos, temppos, 0.8);
         const as = vecRot(vecScale(xaxis, this.start.distance), this.start.angle - parent.cornerAngleInput);
         this.spos = vecEMA(this.spos, as, 1.0);
         const ae = vecRot(vecScale(xaxis, this.end.distance), this.end.angle - parent.cornerAngleInput);
@@ -53,7 +58,7 @@ class Slider {
         
         let v = lineCP(this.epos, this.pos, this.spos).t;
         v = v > 1 ? 1 : v < 0 ? 0 : v; // constraining v between 0 to 1
-        this.val = calEMA(v, this.val, 1.0);
+        this.val = calEMA(v, this.val, 0.3);
     }
   }
   
