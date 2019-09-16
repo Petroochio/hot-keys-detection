@@ -191,12 +191,12 @@ export class Panel2 {
           this.ctx.textBaseline = "top";
           this.ctx.translate(0, 0);
           this.ctx.rotate(0);
-          this.ctx.fillText(this.station.toFixed(1), 270, 100);
+          this.ctx.fillText(this.station.toFixed(1), 310, 120);
           this.ctx.font = "25px sans-serif";
-          this.ctx.fillText('FM', 400, 100);
+          this.ctx.fillText('FM', 420, 120);
 
-          this.ctx.strokeRect(500, 100, 150, 40);   
-          this.ctx.fillRect(500, 100, 150*this.volume, 40);
+          this.ctx.strokeRect(520, 120, 150, 40);   
+          this.ctx.fillRect(520, 120, 150*this.volume, 40);
           break;
         
         case 1:

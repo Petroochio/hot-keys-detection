@@ -94,7 +94,7 @@ def get_keys():
   global camImage
   global camData
   ret, frame = cap.read()
-  frame = cv2.addWeighted(frame, 1.3, np.zeros(frame.shape, frame.dtype), 0, 0)
+  frame = cv2.addWeighted(frame, 1.1, np.zeros(frame.shape, frame.dtype), 0, 0)
 
   # RESIZE FUNCTION TO REDUCE LATENCY - MAYBE????
   # 1280x720 1120x630 960x540

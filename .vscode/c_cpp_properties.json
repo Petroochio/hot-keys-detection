@@ -3,10 +3,12 @@
         {
             "name": "Win32",
             "includePath": [
-                "C:\\Users\\cleme\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.2.9\\**"
+                "C:\\Users\\cleme\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.2.9\\**",
+                "C:\\Users\\cleme\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.5.3\\**"
             ],
             "forcedInclude": [
-                "C:\\Users\\cleme\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.2.9\\cores\\arduino\\Arduino.h"
+                "C:\\Users\\cleme\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.2.9\\cores\\arduino\\Arduino.h",
+                "C:\\Users\\cleme\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.5.3\\cores\\arduino\\Arduino.h"
             ],
             "intelliSenseMode": "msvc-x64",
             "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.16.27023/bin/Hostx64/x64/cl.exe",
