@@ -23,38 +23,33 @@
       }
 
       #parametersMenu {
-          position: relative;
-          float: left;
-          margin: 2em;
-          font-family: monospace;
-          z-index: 5;
+        position: relative;
+        float: left;
+        margin: 2em;
+        font-family: monospace;
+        z-index: 5;
       }
 
       .parameterItem {
-          position: relative;
-          float: left;
-          clear: both;
-          margin-bottom: 0.5em;
+        position: relative;
+        float: left;
+        clear: both;
+        margin-bottom: 0.5em;
       }
 
       .parameterItem span {
-          position: relative;
-          float: left;
-          width: 16em;
-          line-height: 1.7em;
+        position: relative;
+        float: left;
+        width: 16em;
+        line-height: 1.7em;
       }
 
       .parameterItem input {
-          position: relative;
-          float: left;
-          width: 5em;
+        position: relative;
+        float: left;
+        width: 5em;
       }
     </style>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
-    <script src="static/quadmap/config.js"></script>
-    <script src="static/quadmap/index.js"></script>
-    <script src="static/preview.js"></script>
   </head>
 
   <body>
@@ -129,5 +124,15 @@
         </div>
     </div>
     <img id="marker-image"></img>
+
+    <script>
+      const websocket = new WebSocket("ws://127.0.0.1:5000/");
+
+      websocket.onmessage = (event) => {
+        console.log(event);
+        data = JSON.parse(event.data);
+        console.log(data);
+      };
+    </script>
   </body>
 </html>

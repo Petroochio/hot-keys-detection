@@ -159,7 +159,6 @@ function init() {
         };
       });
 
-      // HERE IS WHERE THE ARRAY OF MARKERS IS CLEMENT
       // MappedMarkers
       const timenow = Date.now();
 

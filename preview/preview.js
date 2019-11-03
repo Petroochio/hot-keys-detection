@@ -40,9 +40,6 @@ function init() {
           };
         }
       });
-
-      // HERE IS WHERE THE ARRAY OF MARKERS IS CLEMENT
-      // console.log(mappedMarkers);
     }
   });
 
@@ -61,7 +58,6 @@ function init() {
   socket.emit('get camera config');
 
   const sendParam = (e) => {
-    console.log(e.target.name, e.target.value);
     if (e.target.name == 'cameraIndex') {
       socket.emit(
         'set camera',

@@ -8,7 +8,7 @@ export function createButtonState(inputID) {
     name: `Input ${inputID}`,
     type: 'BUTTON',
     actorID: '', // unset
-    detectWindow: 250,
+    detectWindow: 100,
     relativePosition: { distance: 0, angle: 0 }, // unset
   }
 }

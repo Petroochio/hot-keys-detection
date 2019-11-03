@@ -19,6 +19,7 @@ import os.path
 cap = None
 camID = 0
 camData = None
+whiteBalance = 1
 
 # set aruco dictionary
 dictionary_name = aruco.DICT_4X4_100
@@ -29,9 +30,11 @@ cameraParameters = aruco.DetectorParameters_create()
 def write_camera_params():
   global camID
   global cameraParameters
+  global whiteBalance
 
   params = {
     'camID': camID,
+    'whiteBalance': whiteBalance,
 
     'adaptiveThreshWinSizeMin': cameraParameters.adaptiveThreshWinSizeMin,
     'adaptiveThreshWinSizeStep': cameraParameters.adaptiveThreshWinSizeStep,
@@ -61,6 +64,7 @@ def load_camera_config():
   params = eval(config)
 
   camID = params['camID']
+  whiteBalance = params['whiteBalance']
   # Thresholding
   cameraParameters.adaptiveThreshWinSizeMin = params['adaptiveThreshWinSizeMin']
   cameraParameters.adaptiveThreshWinSizeStep = params['adaptiveThreshWinSizeStep']
@@ -93,8 +97,10 @@ def get_keys():
   global cap
   global camImage
   global camData
+  global whiteBalance
+
   ret, frame = cap.read()
-  frame = cv2.addWeighted(frame, 1.3, np.zeros(frame.shape, frame.dtype), 0, 0)
+  frame = cv2.addWeighted(frame, whiteBalance, np.zeros(frame.shape, frame.dtype), 0, 0)
 
   # RESIZE FUNCTION TO REDUCE LATENCY - MAYBE????
   # 1280x720 1120x630 960x540
@@ -178,12 +184,6 @@ async def image_loop():
       await sio.emit('update image', { 'image': image })
     await asyncio.sleep(1/30)
 
-
-async def index(request):
-  """Serve the client-side application."""
-  with open('preview/index.html') as f:
-    return web.Response(text=f.read(), content_type='text/html')
-
 @sio.on('connect')
 def connect(sid, environ):
   print("connect ", sid)
@@ -199,14 +199,18 @@ async def get_params(sid):
 @sio.on('set attribute')
 def set_attribute(sid, data):
   global cameraParameters
-  param = getattr(cameraParameters, data['attr']) 
+  global whiteBalance
+  if (data['attr'] == 'whiteBalance'):
+    whiteBalance = float(data['value'])
+  else:
+    param = getattr(cameraParameters, data['attr'])
 
-  if (isinstance(param, int)):
-    setattr(cameraParameters, data['attr'], int(data['value']))
-    print("Set param '" + data['attr'] + "' to: " + str(int(data['value'])))
-  elif (isinstance(param, float)):
-    print("Set param '" + data['attr'] + "' to: " + str(float(data['value'])))
-    setattr(cameraParameters, data['attr'], float(data['value']))
+    if (isinstance(param, int)):
+      setattr(cameraParameters, data['attr'], int(data['value']))
+      print("Set param '" + data['attr'] + "' to: " + str(int(data['value'])))
+    elif (isinstance(param, float)):
+      print("Set param '" + data['attr'] + "' to: " + str(float(data['value'])))
+      setattr(cameraParameters, data['attr'], float(data['value']))
   
   write_camera_params()
 
@@ -261,7 +265,17 @@ def set_uv_config(sid, data):
 def disconnect(sid):
   print('disconnect ', sid)
 
+async def index(request):
+  """Serve the client-side application."""
+  with open('preview/index.html') as f:
+    return web.Response(text=f.read(), content_type='text/html')
+
+async def inputGenerator(request):
+  with open('preview/InputGenerator/index.html') as f:
+    return web.Response(text=f.read(), content_type='text/html')
+
 app.router.add_get('/', index)
+app.router.add_get('/inputgenerator', inputGenerator)
 app.router.add_static('/static/', path=str('./preview'), name='static')
 
 if __name__ == '__main__':

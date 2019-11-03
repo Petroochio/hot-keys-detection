@@ -68,7 +68,6 @@ function init() {
         };
       });
 
-      // HERE IS WHERE THE ARRAY OF MARKERS IS CLEMENT
       // MappedMarkers
       const timenow = Date.now();
 
@@ -352,7 +351,7 @@ function mapPointToUV(pt) {
     };
   }
 
-  // console.warn('Cannot find quad for given point in: mapPointToUV') // PETER CODE LAGS AROUND HERE
+  // console.warn('Cannot find quad for given point in: mapPointToUV') 
   // Probs should throw error
   return undefined;
 }
