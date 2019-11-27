@@ -81,7 +81,9 @@ export function update(timenow) {
           relativePositionArr.push(relativePosition(anchor, actor, inputGroupState[group].markerSize));
           relativePositionCounter++;
 
-          if (relativePositionCounter > 30) {
+          if (relativePositionCounter > 199) {
+            let rpd = relativePositionArr.map(p => (p.distance));
+            download(JSON.stringify(rpd), rp+actor.id, ".txt");
             let d = 0, a = 0;
             relativePositionArr.forEach(p => {
               d = d + p.distance;
@@ -113,7 +115,7 @@ export function update(timenow) {
           relativePositionArr.push(relativePosition(anchor, actor, inputGroupState[group].markerSize));
           relativePositionCounter++;
 
-          if (relativePositionCounter > 30) {
+          if (relativePositionCounter > 199) {
             let d = 0, a = 0;
             relativePositionArr.forEach(p => {
               d = d + p.distance;
@@ -250,3 +252,21 @@ export function init() {
 }
 
 window.onresize = resize;
+
+function download(data, filename, type) {
+  var file = new Blob([data], {type: type});
+  if (window.navigator.msSaveOrOpenBlob) // IE10+
+      window.navigator.msSaveOrOpenBlob(file, filename);
+  else { // Others
+      var a = document.createElement("a"),
+              url = URL.createObjectURL(file);
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function() {
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);  
+      }, 0); 
+  }
+}

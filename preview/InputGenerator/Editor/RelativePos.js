@@ -29,7 +29,7 @@ export function relativePosition(anchor, actor, markerSize) {
   const acB = matrixTransform(q2rB, anchor.center);
 
   return {
-    distance: (vecMag(ac) + vecMag(acB))/2,
+    distance: vecMag(ac),
     angle: vecAngleBetween(vecSub({x:0, y:0}, mc[0]), vecSub({x:0, y:0}, ac)),
   };
 }
