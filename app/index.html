@@ -131,7 +131,7 @@
       const image = document.querySelector('#marker-image');
 
       websocket.onmessage = (event) => {
-        data = JSON.parse(event.data);
+        const data = JSON.parse(event.data);
         switch (data.type) {
           case 'video':
             image.src = 'data:image/png;base64,' + data.pixels;

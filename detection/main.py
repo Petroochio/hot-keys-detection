@@ -117,8 +117,7 @@ async def video_send_loop(websocket, path):
 async def marker_detect_loop(websocket, path):
   while True:
     message = await detection_loop()
-    # await websocket.send(message)
-    await websocket.send(json.dumps({'type': 'fake'}))
+    await websocket.send(message)
     await asyncio.sleep(0.01)
 
 async def consumer(message, socket):

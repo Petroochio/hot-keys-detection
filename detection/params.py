@@ -1,5 +1,6 @@
 # file io stuff
 import os.path
+import json
 
 camID = 0
 whiteBalance = 1
@@ -58,7 +59,7 @@ def write_camera_params(cameraParameters):
   }
 
   file = open('configs/camera.txt', 'w')
-  file.write(str(params))
+  file.write(json.dumps(params))
   file.close()
 
 def load_camera_config(cameraParameters):
