@@ -1,111 +1,45 @@
-import base64
-import threading
-import time
-
-# cv libs
+import os.path
 import cv2
 import numpy as np
 from cv2 import aruco
-
-# socket libs
 import asyncio
-from aiohttp import web
-import socketio
-
+import websockets
+import json
+import params
+import base64
 # file io stuff
 import os.path
 
+CLIENTS = set()
+
 # CV STUFF
 cap = None
-camID = 0
 camData = None
-whiteBalance = 1
 
 # set aruco dictionary
 dictionary_name = aruco.DICT_4X4_100
 dictionary = aruco.getPredefinedDictionary(dictionary_name)
-
 cameraParameters = aruco.DetectorParameters_create()
-
-def write_camera_params():
-  global camID
-  global cameraParameters
-  global whiteBalance
-
-  params = {
-    'camID': camID,
-    'whiteBalance': whiteBalance,
-
-    'adaptiveThreshWinSizeMin': cameraParameters.adaptiveThreshWinSizeMin,
-    'adaptiveThreshWinSizeStep': cameraParameters.adaptiveThreshWinSizeStep,
-    'adaptiveThreshConstant': cameraParameters.adaptiveThreshConstant,
-
-    'minMarkerPerimeterRate': cameraParameters.minMarkerPerimeterRate,
-    'maxMarkerPerimeterRate': cameraParameters.maxMarkerPerimeterRate,
-    'minCornerDistanceRate': cameraParameters.minCornerDistanceRate,
-    'minMarkerDistanceRate': cameraParameters.minMarkerDistanceRate,
-    'minDistanceToBorder': cameraParameters.minDistanceToBorder,
-
-    'markerBorderBits': cameraParameters.markerBorderBits,
-    'minOtsuStdDev': cameraParameters.minOtsuStdDev,
-    'perspectiveRemoveIgnoredMarginPerCell': cameraParameters.perspectiveRemoveIgnoredMarginPerCell,
-
-    'maxErroneousBitsInBorderRate': cameraParameters.maxErroneousBitsInBorderRate,
-    'errorCorrectionRate': cameraParameters.errorCorrectionRate
-  }
-
-  file = open('configs/camera.txt', 'w')
-  file.write(str(params))
-  file.close()
-
-def load_camera_config():
-  file = open('configs/camera.txt', 'r') 
-  config = file.read()
-  params = eval(config)
-
-  camID = params['camID']
-  whiteBalance = params['whiteBalance']
-  # Thresholding
-  cameraParameters.adaptiveThreshWinSizeMin = params['adaptiveThreshWinSizeMin']
-  cameraParameters.adaptiveThreshWinSizeStep = params['adaptiveThreshWinSizeStep']
-  cameraParameters.adaptiveThreshConstant = params['adaptiveThreshConstant']
-  # Contour Filtering
-  cameraParameters.minMarkerPerimeterRate = params['minMarkerPerimeterRate']
-  cameraParameters.maxMarkerPerimeterRate = params['maxMarkerPerimeterRate']
-  cameraParameters.minCornerDistanceRate = params['minCornerDistanceRate']
-  cameraParameters.minMarkerDistanceRate = params['minMarkerDistanceRate']
-  cameraParameters.minDistanceToBorder = params['minDistanceToBorder']
-  # Bits Extraction
-  cameraParameters.markerBorderBits = params['markerBorderBits']
-  cameraParameters.minOtsuStdDev = params['minOtsuStdDev']
-  cameraParameters.perspectiveRemoveIgnoredMarginPerCell = params['perspectiveRemoveIgnoredMarginPerCell']
-  # parameters.perpectiveRemovePixelPerCell = 10 # 4
-  # Marker Identification
-  cameraParameters.maxErroneousBitsInBorderRate = params['maxErroneousBitsInBorderRate']
-  cameraParameters.errorCorrectionRate = params['errorCorrectionRate']
 
 # init camera
 def init_camera():
   global cap
-  global camID
-  cap = cv2.VideoCapture(camID)
+  cap = cv2.VideoCapture(params.getCamera())
   cap.set(cv2.CAP_PROP_FPS, 60)
   cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
   cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
-def get_keys():
+def get_markers():
   global cap
   global camImage
   global camData
-  global whiteBalance
 
   ret, frame = cap.read()
-  frame = cv2.addWeighted(frame, whiteBalance, np.zeros(frame.shape, frame.dtype), 0, 0)
+  frame = cv2.addWeighted(frame, params.getWhiteBalance(), np.zeros(frame.shape, frame.dtype), 0, 0)
 
   # RESIZE FUNCTION TO REDUCE LATENCY - MAYBE????
   # 1280x720 1120x630 960x540
   frame = cv2.resize(frame, (1280, 720))
-
   # process key here
   corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, dictionary, parameters=cameraParameters)
   camImage = frame
@@ -121,167 +55,131 @@ def get_keys():
   # Join Corners and Ids into one array
   for i,markerId in enumerate(ids.tolist()):
     markers.append({ 'id': markerId[0], 'corners': markerCorners[i][0] })
-  
+
   result = {
     'markers': markers,
   }
 
   return result
 
-# create a Socket.IO server
-sio = socketio.AsyncServer(port='5000')
-app = web.Application()
-sio.attach(app)
-
 isDetecting = False
 isChangingCamera = False
 detectionThread = None
 camImage = None
+
 async def detection_loop():
   global cap
-  global sio
   global isChangingCamera
   global camImage
+  global watCount
 
-  while (True):
-    keyInfo = { 'markers': [] }
+  keyInfo = { 'markers': [] }
 
-    try:
-      if (not isChangingCamera):
-        captureInfo = get_keys()
-        keyInfo['markers'] = captureInfo['markers']
-      else:
-        isChangingCamera = False
-        cap.release()
-        init_camera()
-    except Exception:
+  try:
+    if (not isChangingCamera):
+      captureInfo = get_markers()
+      keyInfo['markers'] = captureInfo['markers']
+    else:
+      isChangingCamera = False
       cap.release()
-      try:
-        init_camera()
-      except Exception:
-        pass
+      init_camera()
+  except Exception:
+    cap.release()
+    try:
+      init_camera()
+    except Exception:
       pass
+    pass
+  return json.dumps({'type': 'markers', 'markers': keyInfo })
 
-    await sio.emit('update markers', keyInfo)
-    await asyncio.sleep(1/70)
-
-imageThread = None
-async def image_loop():
+isSendingVideo = False
+async def video_send_loop(websocket, path):
+  global isSendingVideo
   global camImage
-  global sio
 
-  while(True):
-    if (camImage is not None):
-      corners, ids, rejectedImgPoints = camData
+  while True:
+    if (isSendingVideo):
+      if (camImage is not None):
+        corners, ids, rejectedImgPoints = camData
 
-      frame = aruco.drawDetectedMarkers(camImage, corners, ids, borderColor=(0, 0, 255))
-      frame = aruco.drawDetectedMarkers(frame, rejectedImgPoints, borderColor=(0, 255, 0))
+        frame = aruco.drawDetectedMarkers(camImage, corners, ids, borderColor=(0, 0, 255))
+        frame = aruco.drawDetectedMarkers(frame, rejectedImgPoints, borderColor=(0, 255, 0))
 
-      # Encode Image for sending
-      ret, buffer = cv2.imencode('.jpg', cv2.resize(frame, (640, 360)))
-      image = base64.b64encode(buffer).decode('utf-8')
+        # Encode Image for sending
+        ret, buffer = cv2.imencode('.jpg', cv2.resize(frame, (640, 360)))
+        image = base64.b64encode(buffer).decode('utf-8')
 
-      await sio.emit('update image', { 'image': image })
-    await asyncio.sleep(1/30)
+        message = json.dumps({'type': 'video', 'pixels': image})
 
-@sio.on('connect')
-def connect(sid, environ):
-  print("connect ", sid)
+        await websocket.send(message)
+    await asyncio.sleep(0.05)
 
-@sio.on('get camera config')
-async def get_params(sid):
-  file = open('configs/camera.txt', 'r') 
-  config = file.read()
-  params = eval(config)
+async def marker_detect_loop(websocket, path):
+  while True:
+    message = await detection_loop()
+    # await websocket.send(message)
+    await websocket.send(json.dumps({'type': 'fake'}))
+    await asyncio.sleep(0.01)
 
-  await sio.emit('send camera config', params)
-
-@sio.on('set attribute')
-def set_attribute(sid, data):
+async def consumer(message, socket):
   global cameraParameters
-  global whiteBalance
-  if (data['attr'] == 'whiteBalance'):
-    whiteBalance = float(data['value'])
-  else:
-    param = getattr(cameraParameters, data['attr'])
+  global isSendingVideo
 
-    if (isinstance(param, int)):
-      setattr(cameraParameters, data['attr'], int(data['value']))
-      print("Set param '" + data['attr'] + "' to: " + str(int(data['value'])))
-    elif (isinstance(param, float)):
-      print("Set param '" + data['attr'] + "' to: " + str(float(data['value'])))
-      setattr(cameraParameters, data['attr'], float(data['value']))
-  
-  write_camera_params()
+  data = json.loads(message)
+  if data['type'] == 'get camera params':
+    await socket.send(json.dumps({'type': 'camera params', 'params': params.getParams()}))
 
-@sio.on('set camera')
-def set_camera(sid, data):
-  global camID
-  global isChangingCamera
-  camID = int(data['camID'])
-  isChangingCamera = True
+  elif data['type'] == 'set camera param':
+    params.setParam(data['name'], data['value'], cameraParameters)
 
-@sio.on('stop detection')
-def stop_detection(sid):
-  global isDetecting
-  global detectionThread
+  elif data['type'] == 'toggle video':
+    isSendingVideo = (not isSendingVideo)
 
-  if (isDetecting):
-    isDetecting = False
-    detectionThread.stop()
-    print('Detection Stopped')
+  elif data['type'] == 'get input config':
+    config = 'ERROR NO CONFIG'
+    if (os.path.isfile('configs/inputs.txt')):
+      file = open('configs/inputs.txt', 'r') 
+      config = file.read()
 
-@sio.on('get uv config')
-async def get_uv_config(sid):
-  config = 'ERROR NO CONFIG'
-  if (os.path.isfile('configs/uvs.txt')):
-    file = open('configs/uvs.txt', 'r') 
-    config = file.read()
-  await sio.emit('send uv config', { 'config': config })
+    message = json.dumps({'type': 'input config', 'config': config })
+    await socket.send(message)
 
-@sio.on('set uv config')
-def set_uv_config(sid, data):
-  # write data['config'] to file
-  file = open('configs/uvs.txt', 'w')
-  file.write(data['config'])
-  file.close()
+  elif data['type'] == 'set input config':
+    # write data['config'] to file
+    file = open('configs/inputs.txt', 'w')
+    file.write(data['config'])
+    file.close()
 
-@sio.on('get inputs config')
-async def get_inputs_config(sid):
-  config = 'ERROR NO CONFIG'
-  if (os.path.isfile('configs/inputs.txt')):
-    file = open('configs/inputs.txt', 'r') 
-    config = file.read()
-  await sio.emit('send inputs config', { 'config': config })
+async def consumer_handler(websocket, path):
+  await websocket.send(json.dumps({'type': 'connected'}))
+  async for message in websocket:
+    # print(message)
+    await consumer(message, websocket)
 
-@sio.on('set inputs config')
-def set_uv_config(sid, data):
-  # write data['config'] to file
-  file = open('configs/inputs.txt', 'w')
-  file.write(data['config'])
-  file.close()
+async def handler(websocket, path):
+  print('new connection')
 
-@sio.on('disconnect')
-def disconnect(sid):
-  print('disconnect ', sid)
+  consumer_task = asyncio.ensure_future(consumer_handler(websocket, path))
+  marker_task = asyncio.ensure_future(marker_detect_loop(websocket, path))
+  video_task = asyncio.ensure_future(video_send_loop(websocket, path))
 
-async def index(request):
-  """Serve the client-side application."""
-  with open('preview/index.html') as f:
-    return web.Response(text=f.read(), content_type='text/html')
+  done, pending = await asyncio.wait(
+    [consumer_task, marker_task, video_task],
+    return_when=asyncio.FIRST_COMPLETED,
+  )
 
-async def inputGenerator(request):
-  with open('preview/InputGenerator/index.html') as f:
-    return web.Response(text=f.read(), content_type='text/html')
-
-app.router.add_get('/', index)
-app.router.add_get('/inputgenerator', inputGenerator)
-app.router.add_static('/static/', path=str('./preview'), name='static')
+  for task in pending:
+    task.cancel()
 
 if __name__ == '__main__':
-  load_camera_config()
   init_camera()
-  detectionThread = sio.start_background_task(target=detection_loop)
-  imageThread = sio.start_background_task(target=image_loop)
-
-  web.run_app(app, port='5000')
+  get_markers()
+  start_server = websockets.serve(handler, "localhost", 5000)
+  
+  try:
+    asyncio.get_event_loop().run_until_complete(start_server)
+    print("Mechamarkers server up on localhost:5000")
+    asyncio.get_event_loop().run_forever()
+  except KeyboardInterrupt:
+    print("Received exit, exiting")
+  
