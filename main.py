@@ -21,6 +21,9 @@ dictionary_name = aruco.DICT_4X4_100
 dictionary = aruco.getPredefinedDictionary(dictionary_name)
 cameraParameters = aruco.DetectorParameters_create()
 
+sockets = set()
+videoClients = set()
+
 # init camera
 def init_camera():
   global cap
@@ -40,6 +43,9 @@ def get_markers():
   # RESIZE FUNCTION TO REDUCE LATENCY - MAYBE????
   # 1280x720 1120x630 960x540
   frame = cv2.resize(frame, (1280, 720))
+
+  if (params.getFlip()):
+    frame = np.fliplr(frame)
   # process key here
   corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, dictionary, parameters=cameraParameters)
   camImage = frame
@@ -93,12 +99,12 @@ async def detection_loop():
   return json.dumps({'type': 'markers', 'markers': keyInfo })
 
 isSendingVideo = False
-async def video_send_loop(websocket, path):
+async def video_send_loop():
   global isSendingVideo
   global camImage
 
   while True:
-    if (isSendingVideo):
+    if (sockets and videoClients):
       if (camImage is not None):
         corners, ids, rejectedImgPoints = camData
 
@@ -110,17 +116,31 @@ async def video_send_loop(websocket, path):
         image = base64.b64encode(buffer).decode('utf-8')
 
         message = json.dumps({'type': 'video', 'pixels': image})
+        try:
+          for ID in videoClients:
+            for sock in sockets:
+              if (ID == sock[1]):
+                await sock[0].send(message)
+        except Exception:
+          print('video send error')
+          pass
 
-        await websocket.send(message)
     await asyncio.sleep(0.05)
 
-async def marker_detect_loop(websocket, path):
+async def marker_detect_loop():
+  global sockets
+
   while True:
     message = await detection_loop()
-    await websocket.send(message)
+    if (sockets):
+      try:
+        await asyncio.wait([sock[0].send(message) for sock in sockets])
+      except Exception:
+        print('marker send error')
+        pass
     await asyncio.sleep(0.01)
 
-async def consumer(message, socket):
+async def consumer(message, socket, socketID):
   global cameraParameters
   global isSendingVideo
 
@@ -130,9 +150,14 @@ async def consumer(message, socket):
 
   elif data['type'] == 'set camera param':
     params.setParam(data['name'], data['value'], cameraParameters)
+    if (data['name'] == 'camera id'):
+      init_camera()
 
-  elif data['type'] == 'toggle video':
-    isSendingVideo = (not isSendingVideo)
+  elif data['type'] == 'send video':
+    videoClients.add(socketID)
+  
+  elif data['type'] == 'stop video':
+    videoClients.remove(socketID)
 
   elif data['type'] == 'get input config':
     config = 'ERROR NO CONFIG'
@@ -149,34 +174,41 @@ async def consumer(message, socket):
     file.write(data['config'])
     file.close()
 
-async def consumer_handler(websocket, path):
+async def consumer_handler(websocket, path, socketID):
   await websocket.send(json.dumps({'type': 'connected'}))
   async for message in websocket:
-    # print(message)
-    await consumer(message, websocket)
+    await consumer(message, websocket, socketID)
 
+
+numSockets = 0
 async def handler(websocket, path):
-  print('new connection')
+  global numSockets
+  global sockets
+  numSockets += 1
 
-  consumer_task = asyncio.ensure_future(consumer_handler(websocket, path))
-  marker_task = asyncio.ensure_future(marker_detect_loop(websocket, path))
-  video_task = asyncio.ensure_future(video_send_loop(websocket, path))
+  consumer_task = asyncio.ensure_future(consumer_handler(websocket, path, numSockets))
+  newSocket = (websocket, numSockets)
 
+  sockets.add(newSocket)
   done, pending = await asyncio.wait(
-    [consumer_task, marker_task, video_task],
+    [consumer_task],
     return_when=asyncio.FIRST_COMPLETED,
   )
 
-  for task in pending:
-    task.cancel()
+  sockets.remove(newSocket)
 
 if __name__ == '__main__':
+  params.load_camera_config(cameraParameters)
   init_camera()
   get_markers()
   start_server = websockets.serve(handler, "localhost", 5000)
   
   try:
-    asyncio.get_event_loop().run_until_complete(start_server)
+    loop = asyncio.get_event_loop()
+    loop.create_task(video_send_loop())
+    loop.create_task(marker_detect_loop())
+    loop.run_until_complete(start_server)
+
     print("Mechamarkers server up on localhost:5000")
     asyncio.get_event_loop().run_forever()
   except KeyboardInterrupt:

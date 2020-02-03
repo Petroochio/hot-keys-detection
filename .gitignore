@@ -1,5 +1,4 @@
 build
 dist
-configs
 __pycache__
 **/node_modules

@@ -4,11 +4,12 @@ import json
 
 camID = 0
 whiteBalance = 1
+isFlipped = False
 
 def getParams():
   file = open('configs/camera.txt', 'r') 
   config = file.read()
-  params = eval(config)
+  params = json.loads(config)
   return config
 
 def getWhiteBalance():
@@ -17,11 +18,15 @@ def getWhiteBalance():
 def setParam(paramName, value, cameraParameters):
   global camID
   global whiteBalance
+  global isFlipped
 
   if (paramName == 'whiteBalance'):
     whiteBalance = float(value)
   elif (paramName == 'camera id'):
+    print(value)
     camID = int(value)
+  elif (paramName == 'flip camera'):
+    isFlipped = value
   else:
     currentValue = getattr(cameraParameters, paramName)
 
@@ -35,10 +40,12 @@ def setParam(paramName, value, cameraParameters):
 def write_camera_params(cameraParameters):
   global camID
   global whiteBalance
+  global isFlipped
 
   params = {
     "camera id": camID,
     "whiteBalance": whiteBalance,
+    "flip camera": isFlipped,
 
     "adaptiveThreshWinSizeMin": cameraParameters.adaptiveThreshWinSizeMin,
     "adaptiveThreshWinSizeStep": cameraParameters.adaptiveThreshWinSizeStep,
@@ -65,10 +72,11 @@ def write_camera_params(cameraParameters):
 def load_camera_config(cameraParameters):
   file = open('configs/camera.txt', 'r') 
   config = file.read()
-  params = eval(config)
+  params = json.loads(config)
 
-  camID = params['camID']
+  camID = params['camera id']
   whiteBalance = params['whiteBalance']
+  isFlipped = params['flip camera']
   # Thresholding
   cameraParameters.adaptiveThreshWinSizeMin = params['adaptiveThreshWinSizeMin']
   cameraParameters.adaptiveThreshWinSizeStep = params['adaptiveThreshWinSizeStep']
@@ -91,3 +99,7 @@ def load_camera_config(cameraParameters):
 def getCamera():
   global camID
   return camID
+
+def getFlip():
+  global isFlipped
+  return isFlipped
